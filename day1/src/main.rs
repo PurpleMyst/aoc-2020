@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use itertools::Itertools;
+use itertools::Itertools as _;
 
 fn main() {
     let expenses = include_str!("input.txt")
