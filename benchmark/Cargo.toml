@@ -1,0 +1,15 @@
+[package]
+name = "aoc-benchmark"
+version = "1.0.0"
+authors = ["PurpleMyst <PurpleMyst@users.noreply.github.com>"]
+edition = "2018"
+
+[dependencies]
+day1 = { path = "../day1" }
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "benchmark"
+harness = false
