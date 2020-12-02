@@ -6,6 +6,7 @@ version = "1.0.0"
 dependencies = [
  "criterion",
  "day1",
+ "day2",
 ]
 
 [[package]]
@@ -203,6 +204,10 @@ version = "1.0.0"
 dependencies = [
  "itertools",
 ]
+
+[[package]]
+name = "day2"
+version = "1.0.0"
 
 [[package]]
 name = "either"

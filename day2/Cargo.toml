@@ -1,0 +1,5 @@
+[package]
+name = "day2"
+version = "1.0.0"
+authors = ["PurpleMyst <PurpleMyst@users.noreply.github.com>"]
+edition = "2018"
