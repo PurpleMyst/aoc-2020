@@ -20,7 +20,7 @@ pub fn solve() -> (u64, u64) {
                 .unwrap_or(false)
         })
         .unwrap();
-    let part1 = n * (2020 - n);
+    let part1 = n * (TARGET - n);
 
     let (&a, &b) = expenses
         .iter()
@@ -33,7 +33,7 @@ pub fn solve() -> (u64, u64) {
         })
         .unwrap();
 
-    let part2 = a * b * (2020 - (a + b));
+    let part2 = a * b * (TARGET - (a + b));
 
     (part1, part2)
 }
