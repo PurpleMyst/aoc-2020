@@ -8,5 +8,9 @@ pub fn day2_benchmark(c: &mut Criterion) {
     c.bench_function("day2", |b| b.iter(|| day2::solve()));
 }
 
-criterion_group!(benches, day1_benchmark, day2_benchmark);
+pub fn alldays_benchmark(c: &mut Criterion) {
+    c.bench_function("all", |b| b.iter(|| (day1::solve(), day2::solve())));
+}
+
+criterion_group!(benches, day1_benchmark, day2_benchmark, alldays_benchmark);
 criterion_main!(benches);
