@@ -2,7 +2,7 @@
  * Try out u8 instead of usize
  * Width is 31. Maybe we could repeat once in the set and use bitwise AND?
  * ~~Replace HashSet with Vec<bool>~~
- * Calculate upper bound in count's range immediately. Maybe height / slope_down?
+ * ~~Calculate upper bound in count's range immediately. Maybe height / slope_down?~~
 */
 
 fn count(
@@ -12,9 +12,8 @@ fn count(
     slope_right: usize,
     slope_down: usize,
 ) -> usize {
-    (0..)
+    (0..height / slope_down)
         .map(|i| ((slope_right * i) % width, (slope_down * i)))
-        .take_while(|&(_, y)| y < height)
         .filter(|&(x, y)| trees[y * width + x])
         .count()
 }
