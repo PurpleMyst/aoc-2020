@@ -5,10 +5,12 @@
  * ~~Calculate upper bound in count's range immediately. Maybe height / slope_down?~~
 */
 
+use bitvec::vec::BitVec;
+
 fn count(
     width: usize,
     height: usize,
-    trees: &[bool],
+    trees: &BitVec,
     slope_right: usize,
     slope_down: usize,
 ) -> usize {
@@ -30,7 +32,7 @@ pub fn solve() -> (usize, usize) {
             width = row.len();
         })
         .flat_map(|row| row.bytes().map(|ch| ch == b'#'))
-        .collect::<Vec<_>>();
+        .collect::<BitVec>();
 
     let part1 = count(width, height, &trees, 3, 1);
 

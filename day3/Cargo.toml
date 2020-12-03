@@ -5,3 +5,4 @@ authors = ["PurpleMyst <PurpleMyst@users.noreply.github.com>"]
 edition = "2018"
 
 [dependencies]
+bitvec = "0.19.4"
