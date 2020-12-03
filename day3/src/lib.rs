@@ -4,6 +4,7 @@ use std::collections::HashSet;
  * Try out u8 instead of usize
  * Width is 31. Maybe we could repeat once in the set and use bitwise AND?
  * Replace HashSet with Vec<bool>
+ * Calculate upper bound in count's range immediately. Maybe height / slope_down?
 */
 
 fn count(
@@ -15,7 +16,7 @@ fn count(
 ) -> usize {
     (0..)
         .map(|i| ((slope_right * i) % width, (slope_down * i)))
-        .take_while(|&(_, y)| y <= height)
+        .take_while(|&(_, y)| y < height)
         .filter(|&(x, y)| trees.contains(&(x, y)))
         .count()
 }
@@ -25,6 +26,7 @@ pub fn solve() -> (usize, usize) {
     let mut height = 0;
 
     let trees = include_str!("input.txt")
+        .trim()
         .lines()
         .enumerate()
         .inspect(|&(y, row)| {
@@ -38,8 +40,7 @@ pub fn solve() -> (usize, usize) {
                 .map(move |(x, _)| (x, y))
         })
         .collect::<HashSet<_>>();
-
-    dbg!(width, height);
+    height += 1;
 
     let part1 = count(width, height, &trees, 3, 1);
 
