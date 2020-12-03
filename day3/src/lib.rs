@@ -1,11 +1,4 @@
-/* TODO:
- * Try out u8 instead of usize
- * Width is 31. Maybe we could repeat once in the set and use bitwise AND?
- * ~~Replace HashSet with Vec<bool>~~
- * ~~Calculate upper bound in count's range immediately. Maybe height / slope_down?~~
-*/
-
-use bitvec::vec::BitVec;
+use bitvec::prelude::*;
 
 fn count(
     width: usize,
