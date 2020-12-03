@@ -1,22 +1,25 @@
-use std::collections::HashSet;
+use bitvec::prelude::*;
 
 use itertools::Itertools as _;
 
-const TARGET: u64 = 2020;
+const TARGET: usize = 2020;
 
 #[inline]
-pub fn solve() -> (u64, u64) {
+pub fn solve() -> (usize, usize) {
+    let mut expenses_set = bitarr![Lsb0, u64; 0; TARGET];
+
     let expenses = include_str!("input.txt")
         .lines()
         .map(|n| n.parse().unwrap())
-        .collect::<HashSet<_>>();
+        .inspect(|&n| expenses_set.set(n, true))
+        .collect::<Vec<_>>();
 
     let n = expenses
         .iter()
         .find(|&&n| {
             TARGET
                 .checked_sub(n)
-                .map(|m| expenses.contains(&m))
+                .map(|m| expenses_set[m])
                 .unwrap_or(false)
         })
         .unwrap();
@@ -28,7 +31,7 @@ pub fn solve() -> (u64, u64) {
         .find(|&(&a, &b)| {
             TARGET
                 .checked_sub(a + b)
-                .map(|c| expenses.contains(&c))
+                .map(|c| expenses_set[c])
                 .unwrap_or(false)
         })
         .unwrap();

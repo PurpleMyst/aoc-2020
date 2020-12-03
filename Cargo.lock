@@ -215,6 +215,7 @@ dependencies = [
 name = "day1"
 version = "1.0.0"
 dependencies = [
+ "bitvec",
  "itertools",
 ]
 
