@@ -1,7 +1,7 @@
 use itertools::Itertools as _;
 
-fn between(x: &str, a: u64, b: u64) -> bool {
-    let x: u64 = x.parse().unwrap();
+fn between(x: &str, a: u16, b: u16) -> bool {
+    let x: u16 = x.parse().unwrap();
     x >= a && x <= b
 }
 
