@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use itertools::Itertools as _;
 
 fn between(x: &str, a: u64, b: u64) -> bool {
@@ -7,7 +5,7 @@ fn between(x: &str, a: u64, b: u64) -> bool {
     x >= a && x <= b
 }
 
-fn hgt(hgt: &str) -> bool {
+fn check_hgt(hgt: &str) -> bool {
     match hgt
         .splitn(2, |ch: char| ch.is_ascii_alphabetic())
         .collect_tuple()
@@ -24,55 +22,73 @@ fn hgt(hgt: &str) -> bool {
     }
 }
 
-fn ecl(ecl: &str) -> bool {
+fn check_ecl(ecl: &str) -> bool {
     ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]
         .iter()
         .any(|&color| color == ecl)
 }
 
-fn pid(pid: &str) -> bool {
+fn check_pid(pid: &str) -> bool {
     pid.len() == 9 && pid.bytes().all(|b| b.is_ascii_digit())
 }
 
-fn hcl(hcl: &str) -> bool {
+fn check_hcl(hcl: &str) -> bool {
     let mut bs = hcl.bytes();
     bs.next() == Some(b'#') && bs.all(|b| b.is_ascii_hexdigit())
 }
 
 pub fn solve() -> (usize, usize) {
-    let mut part1 = 0;
     let mut part2 = 0;
 
-    include_str!("input.txt")
+    let part1 = include_str!("input.txt")
         .trim()
         .split("\r\n\r\n")
-        .for_each(|passport| {
-            let hs = passport
+        .filter_map(|passport| {
+            let mut byr = None;
+            let mut iyr = None;
+            let mut eyr = None;
+            let mut hgt = None;
+            let mut ecl = None;
+            let mut pid = None;
+            let mut hcl = None;
+
+            passport
                 .split_ascii_whitespace()
                 .map(|pair| pair.splitn(2, ':').collect_tuple().unwrap())
-                .collect::<HashMap<_, _>>();
+                .for_each(|(field, value)| match field {
+                    "byr" => byr = Some(value),
+                    "iyr" => iyr = Some(value),
+                    "eyr" => eyr = Some(value),
+                    "hgt" => hgt = Some(value),
+                    "ecl" => ecl = Some(value),
+                    "hcl" => hcl = Some(value),
+                    "pid" => pid = Some(value),
+                    "cid" => {}
+                    _ => unreachable!(),
+                });
 
-            if ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
-                .iter()
-                .find(|&n| !hs.contains_key(n))
-                .is_some()
-            {
-                return;
-            }
+            let byr = byr?;
+            let iyr = iyr?;
+            let eyr = eyr?;
+            let hgt = hgt?;
+            let ecl = ecl?;
+            let pid = pid?;
+            let hcl = hcl?;
 
-            part1 += 1;
-
-            if between(hs["byr"], 1920, 2002)
-                && between(hs["iyr"], 2010, 2020)
-                && between(hs["eyr"], 2020, 2030)
-                && hgt(hs["hgt"])
-                && hcl(hs["hcl"])
-                && ecl(hs["ecl"])
-                && pid(hs["pid"])
+            if between(byr, 1920, 2002)
+                && between(iyr, 2010, 2020)
+                && between(eyr, 2020, 2030)
+                && check_hgt(hgt)
+                && check_hcl(hcl)
+                && check_ecl(ecl)
+                && check_pid(pid)
             {
                 part2 += 1;
             }
-        });
+
+            Some(())
+        })
+        .count();
 
     (part1, part2)
 }
