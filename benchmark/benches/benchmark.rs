@@ -22,12 +22,15 @@ pub fn alldays_benchmark(c: &mut Criterion) {
     });
 }
 
-criterion_group!(
-    benches,
-    day1_benchmark,
-    day2_benchmark,
-    day3_benchmark,
-    day4_benchmark,
-    alldays_benchmark
-);
+criterion_group! {
+    name = benches;
+    config = Criterion::default().significance_level(0.1).sample_size(500);
+    targets =
+        day1_benchmark,
+        day2_benchmark,
+        day3_benchmark,
+        day4_benchmark,
+        alldays_benchmark
+}
+
 criterion_main!(benches);
