@@ -23,9 +23,7 @@ fn check_hgt(hgt: &str) -> bool {
 }
 
 fn check_ecl(ecl: &str) -> bool {
-    ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]
-        .iter()
-        .any(|&color| color == ecl)
+    matches!(ecl, "amb" | "blu" | "brn" | "gry" | "grn" | "hzl" | "oth")
 }
 
 fn check_pid(pid: &str) -> bool {
