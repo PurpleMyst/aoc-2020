@@ -1,13 +1,9 @@
-use bitvec::prelude::*;
-
 // Calculate a participant's answers as an integer whose set bit positions
 // represent each answer's letter as an offset from 'a'
 fn answers<I: IntoIterator<Item = u8>>(participant: I) -> u32 {
-    let mut answers = bitarr![Lsb0, u32; 0; 26];
     participant
         .into_iter()
-        .for_each(|ch| answers.set((ch - b'a') as usize, true));
-    answers.as_slice()[0]
+        .fold(0u32, |prev, ch| prev | (1 << (ch - b'a')))
 }
 
 pub fn solve() -> (u32, u32) {
