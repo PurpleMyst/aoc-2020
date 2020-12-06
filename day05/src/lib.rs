@@ -6,39 +6,23 @@ const WIDTH: usize = 8;
 fn position(boarding_pass: &str) -> (usize, usize) {
     let mut cs = boarding_pass.bytes();
 
-    let row = {
-        let mut lo = 0;
-        let mut hi = HEIGHT - 1;
-
-        cs.by_ref().take(7).for_each(|ch| {
-            let mid = (lo + hi) / 2;
-            match ch {
-                b'F' => hi = mid,
-                b'B' => lo = mid + 1,
+    let row = cs.by_ref().take(7).fold(0, |acc, ch| {
+        acc << 1
+            | match ch {
+                b'F' => 0,
+                b'B' => 1,
                 _ => unreachable!(),
             }
-        });
+    });
 
-        debug_assert_eq!(lo, hi);
-        lo
-    };
-
-    let col = {
-        let mut lo = 0;
-        let mut hi = WIDTH - 1;
-
-        cs.take(3).for_each(|ch| {
-            let mid = (lo + hi) / 2;
-            match ch {
-                b'L' => hi = mid,
-                b'R' => lo = mid + 1,
+    let col = cs.take(3).fold(0, |acc, ch| {
+        acc << 1
+            | match ch {
+                b'L' => 0,
+                b'R' => 1,
                 _ => unreachable!(),
             }
-        });
-
-        debug_assert_eq!(lo, hi);
-        lo
-    };
+    });
 
     (col, row)
 }
