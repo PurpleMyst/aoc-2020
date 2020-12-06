@@ -5,12 +5,12 @@ authors = ["PurpleMyst <PurpleMyst@users.noreply.github.com>"]
 edition = "2018"
 
 [dependencies]
-day1 = { path = "../day1" }
-day2 = { path = "../day2" }
-day3 = { path = "../day3" }
-day4 = { path = "../day4" }
-day5 = { path = "../day5" }
-day6 = { path = "../day6" }
+day01 = { path = "../day01" }
+day02 = { path = "../day02" }
+day03 = { path = "../day03" }
+day04 = { path = "../day04" }
+day05 = { path = "../day05" }
+day06 = { path = "../day06" }
 
 [dev-dependencies]
 criterion = "0.3"

@@ -1,9 +1,8 @@
 [package]
-name = "day1"
+name = "day04"
 version = "1.0.0"
 authors = ["PurpleMyst <PurpleMyst@users.noreply.github.com>"]
 edition = "2018"
 
 [dependencies]
 itertools = "0.9.0"
-bitvec = "0.19.4"

@@ -6,6 +6,7 @@ fn answers<I: IntoIterator<Item = u8>>(participant: I) -> u32 {
         .fold(0u32, |prev, ch| prev | (1 << (ch - b'a')))
 }
 
+#[inline]
 pub fn solve() -> (u32, u32) {
     include_str!("input.txt")
         .split("\n\n")
