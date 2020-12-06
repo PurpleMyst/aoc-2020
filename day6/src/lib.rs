@@ -2,8 +2,8 @@ use bitvec::prelude::*;
 
 // Calculate a participant's answers as an integer whose set bit positions
 // represent each answer's letter as an offset from 'a'
-fn answers<I: IntoIterator<Item = u8>>(participant: I) -> usize {
-    let mut answers = bitarr![Lsb0, usize; 0; 26];
+fn answers<I: IntoIterator<Item = u8>>(participant: I) -> u32 {
+    let mut answers = bitarr![Lsb0, u32; 0; 26];
     participant
         .into_iter()
         .for_each(|ch| answers.set((ch - b'a') as usize, true));
@@ -19,7 +19,7 @@ pub fn solve() -> (u32, u32) {
             let part2 = {
                 group
                     .lines()
-                    .fold(usize::MAX, |common, participant| {
+                    .fold(u32::MAX, |common, participant| {
                         common & answers(participant.bytes())
                     })
                     .count_ones()
