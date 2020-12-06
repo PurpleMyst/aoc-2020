@@ -1,6 +1,7 @@
 import datetime
 import pathlib
 import subprocess
+import webbrowser
 
 import requests
 import toml
@@ -58,6 +59,8 @@ def main() -> None:
         )
         resp.raise_for_status()
         input.write(resp.text)
+
+    webbrowser.open_new(f"https://adventofcode.com/{year}/day/{day}")
 
 
 if __name__ == "__main__":
