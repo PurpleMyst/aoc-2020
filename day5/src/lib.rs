@@ -45,6 +45,7 @@ fn seat_id(pass: &str) -> usize {
     row * WIDTH + col
 }
 
+/* TODO: each row could be a single u8, maybe we could use a "find first 0" function? */
 pub fn solve() -> (usize, usize) {
     let mut passes = bitarr![Lsb0, u64; 0; WIDTH * HEIGHT];
 
