@@ -1,12 +1,10 @@
 use std::cmp::max;
 
-use bitvec::prelude::*;
-
 const HEIGHT: usize = 128;
 const WIDTH: usize = 8;
 
-fn seat_id(pass: &str) -> usize {
-    let mut cs = pass.chars();
+fn position(boarding_pass: &str) -> (usize, usize) {
+    let mut cs = boarding_pass.bytes();
 
     let row = {
         let mut lo = 0;
@@ -15,8 +13,8 @@ fn seat_id(pass: &str) -> usize {
         cs.by_ref().take(7).for_each(|ch| {
             let mid = (lo + hi) / 2;
             match ch {
-                'F' => hi = mid,
-                'B' => lo = mid + 1,
+                b'F' => hi = mid,
+                b'B' => lo = mid + 1,
                 _ => unreachable!(),
             }
         });
@@ -32,8 +30,8 @@ fn seat_id(pass: &str) -> usize {
         cs.take(3).for_each(|ch| {
             let mid = (lo + hi) / 2;
             match ch {
-                'L' => hi = mid,
-                'R' => lo = mid + 1,
+                b'L' => hi = mid,
+                b'R' => lo = mid + 1,
                 _ => unreachable!(),
             }
         });
@@ -42,30 +40,35 @@ fn seat_id(pass: &str) -> usize {
         lo
     };
 
-    row * WIDTH + col
+    (col, row)
 }
 
-/* TODO: each row could be a single u8, maybe we could use a "find first 0" function? */
 #[inline]
 pub fn solve() -> (usize, usize) {
-    let mut passes = bitarr![Lsb0, u64; 0; WIDTH * HEIGHT];
+    let mut rows = [0u8; HEIGHT];
 
     let part1 = include_str!("input.txt")
         .lines()
-        .map(seat_id)
-        .fold(0, |prev, id| {
-            passes.set(id, true);
-            max(prev, id)
+        .map(position)
+        .fold(0, |prev, (col, row)| {
+            rows[row] |= 1 << col;
+
+            max(prev, row * WIDTH + col)
         });
 
-    for row in 1..HEIGHT {
-        for col in 1..WIDTH {
-            let id = row * 8 + col;
-            if !passes[id] && passes[id - 1] {
-                return (part1, id);
+    let part2 = rows
+        .iter()
+        .enumerate()
+        .skip(2) // Assumption: we won't be sitting in the first 2 rows which are edge case-y
+        .find_map(|(y, row)| {
+            let col = row.leading_ones();
+            if col != 8 {
+                Some(y * WIDTH + (WIDTH - col as usize - 1))
+            } else {
+                None
             }
-        }
-    }
+        })
+        .unwrap();
 
-    unreachable!();
+    (part1, part2)
 }

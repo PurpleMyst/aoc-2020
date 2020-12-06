@@ -3,6 +3,3 @@ name = "day05"
 version = "1.0.0"
 authors = ["PurpleMyst <PurpleMyst@users.noreply.github.com>"]
 edition = "2018"
-
-[dependencies]
-bitvec = "0.19.4"

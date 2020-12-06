@@ -253,9 +253,6 @@ dependencies = [
 [[package]]
 name = "day05"
 version = "1.0.0"
-dependencies = [
- "bitvec",
-]
 
 [[package]]
 name = "day06"
