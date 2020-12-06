@@ -40,7 +40,7 @@ pub fn solve() -> (usize, usize) {
 
     let part1 = include_str!("input.txt")
         .trim()
-        .split("\r\n\r\n")
+        .split("\n\n")
         .filter_map(|passport| {
             let mut byr = None;
             let mut iyr = None;
