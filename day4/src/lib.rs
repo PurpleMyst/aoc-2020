@@ -35,6 +35,7 @@ fn check_hcl(hcl: &str) -> bool {
     bs.next() == Some(b'#') && bs.all(|b| b.is_ascii_hexdigit())
 }
 
+#[inline]
 pub fn solve() -> (usize, usize) {
     let mut part2 = 0;
 

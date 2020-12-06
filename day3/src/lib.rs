@@ -13,6 +13,7 @@ fn count(
         .count()
 }
 
+#[inline]
 pub fn solve() -> (usize, usize) {
     let mut width = 0;
     let mut height = 0;
