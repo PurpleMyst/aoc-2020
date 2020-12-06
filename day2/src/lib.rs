@@ -16,7 +16,7 @@ pub fn solve() -> (usize, usize) {
             .collect_tuple()
             .unwrap();
 
-        let present = password.iter().filter(|&&c| c == letter).count();
+        let present = bytecount::naive_count_32(password, letter);
         if present >= low && present <= high {
             part1 += 1;
         }

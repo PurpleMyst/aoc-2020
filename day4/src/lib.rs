@@ -11,7 +11,7 @@ fn check_hgt(hgt: &str) -> bool {
         .collect_tuple()
     {
         Some((hgt, un)) => {
-            if un.ends_with("m") {
+            if un.ends_with('m') {
                 between(hgt, 150, 193)
             } else {
                 between(hgt, 59, 76)
