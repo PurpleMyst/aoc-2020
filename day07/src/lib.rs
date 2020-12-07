@@ -5,7 +5,7 @@ use itertools::Itertools as _;
 
 type Bags = HashMap<&'static str, Vec<(usize, &'static str)>>;
 
-const WANTED: &'static str = "shiny gold";
+const WANTED: &str = "shiny gold";
 
 struct Solver {
     bags: Bags,
@@ -30,14 +30,7 @@ impl Solver {
             .get(bag)
             .unwrap()
             .iter()
-            .find(|&&(_count, bag)| {
-                if bag == WANTED {
-                    true
-                } else {
-                    self.contains_wanted(&bag)
-                }
-            })
-            .is_some();
+            .any(|&(_count, bag)| bag == WANTED || self.contains_wanted(&bag));
 
         self.cache.borrow_mut().insert(bag, value);
 
