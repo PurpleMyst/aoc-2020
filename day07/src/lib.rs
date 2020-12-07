@@ -15,8 +15,8 @@ struct Solver {
 impl Solver {
     fn new(bags: Bags) -> Self {
         Self {
+            cache: RefCell::new(HashMap::with_capacity(bags.len())),
             bags,
-            cache: RefCell::new(HashMap::new()),
         }
     }
 
