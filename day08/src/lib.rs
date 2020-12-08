@@ -1,12 +1,22 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use itertools::Itertools as _;
 
 #[derive(Ord, PartialOrd, Eq, PartialEq, Copy, Clone, Debug)]
-enum Operation {
+pub enum Operation {
     Acc,
     Jmp,
     Nop,
+}
+
+impl std::fmt::Display for Operation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Operation::Acc => f.pad("acc"),
+            Operation::Jmp => f.pad("jmp"),
+            Operation::Nop => f.pad("nop"),
+        }
+    }
 }
 
 impl Operation {
@@ -17,37 +27,36 @@ impl Operation {
             Operation::Nop => *self = Operation::Jmp,
         }
     }
+}
 
-    fn can_toggle(&self) -> bool {
-        match self {
-            Operation::Acc => false,
-            Operation::Jmp | Operation::Nop => true,
-        }
+#[derive(Ord, PartialOrd, Eq, PartialEq, Copy, Clone, Debug)]
+pub struct Instruction {
+    pub operation: Operation,
+    pub argument: i64,
+}
+
+impl std::fmt::Display for Instruction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {:+}", self.operation, self.argument)
     }
 }
 
-#[derive(Ord, PartialOrd, Eq, PartialEq, Copy, Clone, Debug)]
-struct Instruction {
-    operation: Operation,
-    argument: i64,
-}
+pub struct Interpreter {
+    pub instructions: Box<[Instruction]>,
+    pub accumulator: i64,
+    pub pc: usize,
 
-struct Interpreter {
-    instructions: Box<[Instruction]>,
-    accumulator: i64,
-    pc: usize,
-
-    executed: HashSet<usize>,
+    pub executed: HashSet<usize>,
 }
 
 #[derive(Ord, PartialOrd, Eq, PartialEq, Copy, Clone, Debug)]
-enum TerminationReason {
+pub enum TerminationReason {
     InfiniteLoop,
     Completion,
 }
 
 impl Interpreter {
-    fn from_input(input: &str) -> Self {
+    pub fn from_input(input: &str) -> Self {
         let instructions: Box<[Instruction]> = input
             .lines()
             .map(|line| {
@@ -67,18 +76,18 @@ impl Interpreter {
             .collect();
 
         Self {
+            executed: HashSet::with_capacity(instructions.len()),
             instructions,
             accumulator: 0,
             pc: 0,
-            executed: HashSet::new(),
         }
     }
 
-    // Run the program until either
-    // 1) We try to execute an instruction outside of the program, in which case
-    //    `TerminationReason::Completion` is returned
-    // 2) We hit an infinite loop, in which case `TerminationReason::InfiniteLoop` is returned
-    fn run(&mut self) -> TerminationReason {
+    /// Run the program until either
+    /// 1) We try to execute an instruction outside of the program, in which case
+    ///    `TerminationReason::Completion` is returned
+    /// 2) We hit an infinite loop, in which case `TerminationReason::InfiniteLoop` is returned
+    pub fn run_once(&mut self) -> TerminationReason {
         while self.executed.insert(self.pc) {
             match self.instructions.get(self.pc) {
                 Some(Instruction {
@@ -111,7 +120,47 @@ impl Interpreter {
         TerminationReason::InfiniteLoop
     }
 
-    fn reset(&mut self) {
+    /// Starting from the first instruction that would be repeated, iterate, in backwards order,
+    /// through the jumps that led there
+    pub fn trace_backwards(&mut self) -> impl Iterator<Item = usize> {
+        let mut jump_source = HashMap::new();
+
+        while self.executed.insert(self.pc) {
+            match self.instructions.get(self.pc) {
+                Some(Instruction {
+                    operation: Operation::Nop,
+                    ..
+                }) => self.pc += 1,
+
+                Some(Instruction {
+                    operation: Operation::Acc,
+                    argument,
+                }) => {
+                    self.accumulator += argument;
+                    self.pc += 1;
+                }
+
+                Some(Instruction {
+                    operation: Operation::Jmp,
+                    argument,
+                }) => {
+                    let prev_pc = self.pc;
+                    self.pc = (self.pc as i64 + argument) as usize;
+                    jump_source.insert(self.pc, prev_pc);
+                }
+
+                None => {
+                    debug_assert_eq!(self.pc, self.instructions.len());
+                    unreachable!()
+                }
+            };
+        }
+
+        std::iter::successors(Some(self.pc), move |cur| jump_source.get(cur).copied())
+    }
+
+    /// Reset the interpreter to its initial conditions
+    pub fn reset(&mut self) {
         self.pc = 0;
         self.accumulator = 0;
         self.executed.clear();
@@ -121,26 +170,30 @@ impl Interpreter {
 #[inline]
 pub fn solve() -> (i64, i64) {
     let mut interpreter = Interpreter::from_input(include_str!("input.txt"));
-    interpreter.run();
+
+    // Part 1: Just run once and return the accumulator
+    interpreter.run_once();
     let part1 = interpreter.accumulator;
 
-    for i in 0..interpreter.instructions.len() {
-        {
-            let instruction = &mut interpreter.instructions[i];
-            if !instruction.operation.can_toggle() {
-                continue;
+    // Part 2: Try to change each of the jumps that leads to the looping into a
+    //         NOP, returning the value of the accumulator if we find an instruction
+    //         that, when changed, allows the program to run to completion
+    interpreter.reset();
+    let part2 = interpreter
+        .trace_backwards()
+        .skip(1)
+        .find_map(|ancestor| {
+            interpreter.reset();
+            interpreter.instructions[ancestor].operation.toggle();
+
+            if interpreter.run_once() == TerminationReason::Completion {
+                return Some(interpreter.accumulator);
             }
 
-            instruction.operation.toggle();
-        }
+            interpreter.instructions[ancestor].operation.toggle();
+            None
+        })
+        .unwrap();
 
-        interpreter.reset();
-        if interpreter.run() == TerminationReason::Completion {
-            return (part1, interpreter.accumulator);
-        }
-
-        interpreter.instructions[i].operation.toggle();
-    }
-
-    unreachable!();
+    (part1, part2)
 }
