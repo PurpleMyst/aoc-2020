@@ -21,6 +21,10 @@ pub fn solve() -> (u64, u64) {
         .find_map(|window| {
             let (&target, rest) = window.split_last().unwrap();
 
+            // POSSIBLE OPTIMIZATION:
+            // You don't really need to re-calculate all the pairs every time,
+            // you can just calculate the ones that involve the new element and
+            // remove the ones that involved the old first element
             if pairs(rest).map(|(a, b)| a + b).all(|sum| sum != target) {
                 Some(target)
             } else {
