@@ -2,6 +2,13 @@ use itertools::Itertools as _;
 
 const PREAMBLE: usize = 25;
 
+fn pairs<T: Copy>(items: &[T]) -> impl Iterator<Item = (T, T)> + '_ {
+    items
+        .iter()
+        .enumerate()
+        .flat_map(move |(idx, &a)| items.iter().skip(idx + 1).map(move |&b| (a, b)))
+}
+
 #[inline]
 pub fn solve() -> (u64, u64) {
     let numbers = include_str!("input.txt")
@@ -14,12 +21,7 @@ pub fn solve() -> (u64, u64) {
         .find_map(|window| {
             let (&target, rest) = window.split_last().unwrap();
 
-            if rest
-                .iter()
-                .tuple_combinations()
-                .map(|(a, b)| a + b)
-                .all(|sum| sum != target)
-            {
+            if pairs(rest).map(|(a, b)| a + b).all(|sum| sum != target) {
                 Some(target)
             } else {
                 None
