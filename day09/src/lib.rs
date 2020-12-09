@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use itertools::Itertools as _;
 
 const PREAMBLE: usize = 25;
@@ -33,34 +35,32 @@ pub fn solve() -> (u64, u64) {
         })
         .unwrap();
 
-    let part2 = (2..=numbers.len())
-        .find_map(|size| {
-            let mut sum: u64 = numbers.iter().take(size).sum();
+    let mut i = numbers.iter();
+    let mut i_idx = 0;
 
-            if sum == part1 {
-                let (min, max) = numbers.iter().take(size).minmax().into_option().unwrap();
-                return Some(min + max);
+    let mut j = numbers.iter();
+    let mut j_idx = 0;
+
+    let mut sum = 0;
+
+    loop {
+        match sum.cmp(&part1) {
+            Ordering::Less => {
+                j_idx += 1;
+                sum += j.next().unwrap();
             }
 
-            for (prev, (idx, &item)) in numbers.iter().zip(numbers.iter().enumerate().skip(size)) {
-                sum = sum - prev + item;
-
-                if sum == part1 {
-                    let (min, max) = numbers
-                        .iter()
-                        .skip(idx - size + 1)
-                        .take(size)
-                        .minmax()
-                        .into_option()
-                        .unwrap();
-
-                    return Some(min + max);
-                }
+            Ordering::Greater => {
+                i_idx += 1;
+                sum -= i.next().unwrap()
             }
 
-            None
-        })
-        .unwrap();
+            Ordering::Equal => break,
+        }
+    }
+
+    let (min, max) = numbers[i_idx..j_idx].iter().minmax().into_option().unwrap();
+    let part2 = min + max;
 
     (part1, part2)
 }
