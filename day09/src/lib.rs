@@ -35,31 +35,35 @@ pub fn solve() -> (u64, u64) {
         })
         .unwrap();
 
-    let mut i = numbers.iter();
-    let mut i_idx = 0;
+    let mut left_it = numbers.iter();
+    let mut left_idx = 0;
 
-    let mut j = numbers.iter();
-    let mut j_idx = 0;
+    let mut right_it = numbers.iter();
+    let mut right_idx = 0;
 
     let mut sum = 0;
 
     loop {
         match sum.cmp(&part1) {
             Ordering::Less => {
-                j_idx += 1;
-                sum += j.next().unwrap();
+                sum += right_it.next().unwrap();
+                right_idx += 1;
             }
 
             Ordering::Greater => {
-                i_idx += 1;
-                sum -= i.next().unwrap()
+                sum -= left_it.next().unwrap();
+                left_idx += 1;
             }
 
             Ordering::Equal => break,
         }
     }
 
-    let (min, max) = numbers[i_idx..j_idx].iter().minmax().into_option().unwrap();
+    let (min, max) = numbers[left_idx..right_idx]
+        .iter()
+        .minmax()
+        .into_option()
+        .unwrap();
     let part2 = min + max;
 
     (part1, part2)
