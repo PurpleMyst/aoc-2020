@@ -38,9 +38,8 @@ pub fn solve() -> (u64, u64) {
                 return Some(min + max);
             }
 
-            let mut prev = numbers.iter();
-            for (idx, &item) in numbers.iter().enumerate().skip(size) {
-                sum = sum - prev.next().unwrap() + item;
+            for (prev, (idx, &item)) in numbers.iter().zip(numbers.iter().enumerate().skip(size)) {
+                sum = sum - prev + item;
 
                 if sum == part1 {
                     let (min, max) = numbers
