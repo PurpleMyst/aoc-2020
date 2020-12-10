@@ -95,7 +95,9 @@ impl Solver {
         }
     }
 
-    fn walk(&mut self, mut jolts: u8) {
+    fn walk(&mut self) {
+        let mut jolts = 0;
+
         loop {
             self.block.clear();
 
@@ -158,7 +160,7 @@ impl Solver {
 
 fn solve_part2(adapters: [bool; 256]) -> u64 {
     let mut solver = Solver::new(adapters);
-    solver.walk(0);
+    solver.walk();
 
     solver.walks
 }
