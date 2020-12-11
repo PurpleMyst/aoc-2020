@@ -230,7 +230,6 @@ name = "day01"
 version = "1.0.0"
 dependencies = [
  "bitvec",
- "itertools",
 ]
 
 [[package]]
