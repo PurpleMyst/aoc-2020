@@ -1,21 +1,43 @@
 use std::{convert::TryFrom, iter::successors};
 
 #[derive(Ord, PartialOrd, Eq, PartialEq, Copy, Clone, Debug)]
-enum Cell {
+pub enum Cell {
     Floor,
     EmptySeat,
     OccupiedSeat,
 }
 
-fn solve_part1(width: usize, mut seats: Vec<Cell>) -> usize {
-    let mut next_seats = seats.clone();
+const WIDTH: usize = 96;
+const HEIGHT: usize = 98;
+
+#[inline]
+pub fn parse_input() -> Vec<Cell> {
+    let cells: Vec<Cell> = include_str!("input.txt")
+        .lines()
+        .flat_map(|row| {
+            row.bytes().map(|b| match b {
+                b'.' => Cell::Floor,
+                b'L' => Cell::EmptySeat,
+                b'#' => Cell::OccupiedSeat,
+                _ => unreachable!(),
+            })
+        })
+        .collect();
+    debug_assert_eq!(cells.len(), WIDTH * HEIGHT);
+
+    cells
+}
+
+#[inline]
+pub fn solve_part1(seats: &mut [Cell]) -> usize {
+    let mut next_seats = seats.to_vec();
 
     loop {
-        next_seats.clone_from(&seats);
+        next_seats.copy_from_slice(&seats);
 
         let mut it = next_seats.iter_mut();
 
-        for (y, row) in seats.chunks_exact(width).enumerate() {
+        for (y, row) in seats.chunks_exact(WIDTH).enumerate() {
             for ((x, &col), wot) in row.iter().enumerate().zip(it.by_ref()) {
                 if col == Cell::Floor {
                     continue;
@@ -32,11 +54,11 @@ fn solve_part1(width: usize, mut seats: Vec<Cell>) -> usize {
                                 let x = usize::try_from((x as isize) + dx).ok()?;
                                 let y = usize::try_from((y as isize) + dy).ok()?;
 
-                                if x >= width {
+                                if x >= WIDTH {
                                     return None;
                                 }
 
-                                if *seats.get(y * width + x)? == Cell::OccupiedSeat {
+                                if *seats.get(y * WIDTH + x)? == Cell::OccupiedSeat {
                                     Some(())
                                 } else {
                                     None
@@ -62,7 +84,7 @@ fn solve_part1(width: usize, mut seats: Vec<Cell>) -> usize {
             break;
         }
 
-        seats.clone_from(&next_seats);
+        seats.copy_from_slice(&next_seats);
     }
 
     seats
@@ -71,15 +93,14 @@ fn solve_part1(width: usize, mut seats: Vec<Cell>) -> usize {
         .count()
 }
 
-fn solve_part2(width: usize, mut seats: Vec<Cell>) -> usize {
-    let height = seats.len() / width;
-
-    let mut next_seats = seats.clone();
+#[inline]
+pub fn solve_part2(seats: &mut [Cell]) -> usize {
+    let mut next_seats = seats.to_vec();
 
     loop {
-        next_seats.clone_from(&seats);
+        next_seats.copy_from_slice(&seats);
 
-        for (y, row) in seats.chunks_exact(width).enumerate() {
+        for (y, row) in seats.chunks_exact(WIDTH).enumerate() {
             for (x, &col) in row.iter().enumerate() {
                 if col == Cell::Floor {
                     continue;
@@ -97,7 +118,7 @@ fn solve_part2(width: usize, mut seats: Vec<Cell>) -> usize {
                                     let x = usize::try_from((x as isize) + dx).ok()?;
                                     let y = usize::try_from((y as isize) + dy).ok()?;
 
-                                    if x >= width || y >= height {
+                                    if x >= WIDTH || y >= HEIGHT {
                                         return None;
                                     };
 
@@ -106,7 +127,7 @@ fn solve_part2(width: usize, mut seats: Vec<Cell>) -> usize {
                                 .skip(1);
 
                                 match ray
-                                    .map(|(x, y)| seats[y * width + x])
+                                    .map(|(x, y)| seats[y * WIDTH + x])
                                     .find(|&cell| cell != Cell::Floor)
                                 {
                                     Some(Cell::OccupiedSeat) => Some(()),
@@ -125,7 +146,7 @@ fn solve_part2(width: usize, mut seats: Vec<Cell>) -> usize {
                     continue;
                 };
 
-                next_seats[y * width + x] = next_col;
+                next_seats[y * WIDTH + x] = next_col;
             }
         }
 
@@ -133,7 +154,7 @@ fn solve_part2(width: usize, mut seats: Vec<Cell>) -> usize {
             break;
         }
 
-        seats.clone_from(&next_seats);
+        seats.copy_from_slice(&next_seats);
     }
 
     seats
@@ -144,21 +165,12 @@ fn solve_part2(width: usize, mut seats: Vec<Cell>) -> usize {
 
 #[inline]
 pub fn solve() -> (usize, usize) {
-    let mut width = 0;
-
-    let cells: Vec<Cell> = include_str!("input.txt")
-        .lines()
-        .flat_map(|row| {
-            width = row.len();
-
-            row.bytes().map(|b| match b {
-                b'.' => Cell::Floor,
-                b'L' => Cell::EmptySeat,
-                b'#' => Cell::OccupiedSeat,
-                _ => unreachable!(),
-            })
-        })
-        .collect();
-
-    (solve_part1(width, cells.clone()), solve_part2(width, cells))
+    let mut cells = parse_input();
+    (
+        {
+            let mut cells = cells.clone();
+            solve_part1(&mut cells[..])
+        },
+        solve_part2(&mut cells[..]),
+    )
 }

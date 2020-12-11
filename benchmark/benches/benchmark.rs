@@ -43,7 +43,28 @@ pub fn day10_benchmark(c: &mut Criterion) {
 }
 
 pub fn day11_benchmark(c: &mut Criterion) {
-    c.bench_function("day11", |b| b.iter(|| day11::solve()));
+    let mut group = c.benchmark_group("day11");
+
+    let original_cells = day11::parse_input();
+
+    let mut cells = original_cells.clone();
+
+    // We're including the copy in the benchmarks here, but I can't imagine that a simple memcpy() matters much.
+    group.bench_function("part1", |b| {
+        b.iter(|| {
+            cells.copy_from_slice(&original_cells[..]);
+            day11::solve_part1(&mut cells[..])
+        })
+    });
+
+    group.bench_function("part2", |b| {
+        b.iter(|| {
+            cells.copy_from_slice(&original_cells[..]);
+            day11::solve_part2(&mut cells[..])
+        })
+    });
+
+    group.finish();
 }
 
 pub fn alldays_benchmark(c: &mut Criterion) {
