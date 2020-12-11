@@ -110,48 +110,69 @@ pub fn solve_part1(seats: &mut [Cell]) -> usize {
 
 #[inline]
 pub fn solve_part2(seats: &mut [Cell]) -> usize {
+    let ray_casts: Vec<[Option<usize>; 8]> = seats
+        .chunks_exact(WIDTH)
+        .enumerate()
+        .flat_map(|(y, row)| {
+            // Due to the move in the closure below, we must explicitly immutably borrow seats
+            let seats = &seats;
+            row.iter().enumerate().map(move |(x, &col)| {
+                let mut item = [None; 8];
+
+                if col == Floor {
+                    return item;
+                }
+
+                (-1..=1)
+                    .flat_map(|dy| {
+                        (-1..=1).filter_map(move |dx| {
+                            if dx == 0 && dy == 0 {
+                                return None;
+                            }
+
+                            let ray = successors(Some((x, y)), |&(x, y)| {
+                                let x = usize::try_from((x as isize) + dx).ok()?;
+                                let y = usize::try_from((y as isize) + dy).ok()?;
+
+                                if x >= WIDTH || y >= HEIGHT {
+                                    return None;
+                                };
+
+                                Some((x, y))
+                            })
+                            .skip(1);
+
+                            Some(
+                                ray.map(|(x, y)| y * WIDTH + x)
+                                    .find(|&idx| seats[idx] != Cell::Floor),
+                            )
+                        })
+                    })
+                    .zip(item.iter_mut())
+                    .for_each(|(val, elem)| *elem = val);
+
+                item
+            })
+        })
+        .collect();
+
     let mut next_seats = seats.to_vec();
 
     loop {
         next_seats.copy_from_slice(&seats);
 
+        let mut rays = ray_casts.iter();
+
         for (y, row) in seats.chunks_exact(WIDTH).enumerate() {
-            for (x, &col) in row.iter().enumerate() {
+            for ((x, &col), rays) in row.iter().enumerate().zip(rays.by_ref()) {
                 if col == Floor {
                     continue;
                 }
 
-                let occupied_neighbors = (-1..=1)
-                    .map(|dy| {
-                        (-1..=1)
-                            .filter_map(|dx| {
-                                if dx == 0 && dy == 0 {
-                                    return None;
-                                }
-
-                                let ray = successors(Some((x, y)), |&(x, y)| {
-                                    let x = usize::try_from((x as isize) + dx).ok()?;
-                                    let y = usize::try_from((y as isize) + dy).ok()?;
-
-                                    if x >= WIDTH || y >= HEIGHT {
-                                        return None;
-                                    };
-
-                                    Some((x, y))
-                                })
-                                .skip(1);
-
-                                match ray
-                                    .map(|(x, y)| seats[y * WIDTH + x])
-                                    .find(|&cell| cell != Cell::Floor)
-                                {
-                                    Some(OccupiedSeat) => Some(()),
-                                    _ => None,
-                                }
-                            })
-                            .count()
-                    })
-                    .sum::<usize>();
+                let occupied_neighbors = rays
+                    .iter()
+                    .filter(|idx| idx.map_or(false, |idx| seats[idx] == OccupiedSeat))
+                    .count();
 
                 let next_col = if col == EmptySeat && occupied_neighbors == 0 {
                     OccupiedSeat
