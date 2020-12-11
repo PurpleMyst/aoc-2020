@@ -93,7 +93,7 @@ fn solve_part2(width: usize, mut seats: Vec<Cell>) -> usize {
                                     return None;
                                 }
 
-                                let mut ray = successors(Some((x, y)), |&(x, y)| {
+                                let ray = successors(Some((x, y)), |&(x, y)| {
                                     let x = usize::try_from((x as isize) + dx).ok()?;
                                     let y = usize::try_from((y as isize) + dy).ok()?;
 
