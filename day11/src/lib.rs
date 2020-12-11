@@ -6,6 +6,7 @@ pub enum Cell {
     EmptySeat,
     OccupiedSeat,
 }
+use Cell::*;
 
 const WIDTH: usize = 96;
 const HEIGHT: usize = 98;
@@ -35,49 +36,66 @@ pub fn solve_part1(seats: &mut [Cell]) -> usize {
     loop {
         next_seats.copy_from_slice(&seats);
 
-        let mut it = next_seats.iter_mut();
+        let mut next_seats_it = next_seats.iter_mut();
 
-        for (y, row) in seats.chunks_exact(WIDTH).enumerate() {
-            for ((x, &col), wot) in row.iter().enumerate().zip(it.by_ref()) {
-                if col == Cell::Floor {
+        let mut rows = seats.chunks_exact(WIDTH);
+
+        let mut above: &[Cell] = &[];
+        let mut current: &[Cell] = rows.next().unwrap();
+        let mut below: &[Cell] = rows.next().unwrap();
+
+        for _y in 0..HEIGHT {
+            for ((x, &cell), next_cell_spot) in
+                current.iter().enumerate().zip(next_seats_it.by_ref())
+            {
+                if cell == Floor {
                     continue;
                 }
 
-                let occupied_neighbors = (-1..=1)
-                    .map(|dy| {
-                        (-1..=1)
-                            .filter_map(|dx| {
-                                if dx == 0 && dy == 0 {
-                                    return None;
-                                }
+                let occupied_neighbors = match x.checked_sub(1) {
+                    Some(px) => [
+                        above.get(px),
+                        above.get(x),
+                        above.get(x + 1),
+                        current.get(px),
+                        current.get(x + 1),
+                        below.get(px),
+                        below.get(x),
+                        below.get(x + 1),
+                    ]
+                    .iter()
+                    .filter(|cell| matches!(cell, Some(OccupiedSeat)))
+                    .count(),
 
-                                let x = usize::try_from((x as isize) + dx).ok()?;
-                                let y = usize::try_from((y as isize) + dy).ok()?;
+                    None => [
+                        above.get(x),
+                        above.get(x + 1),
+                        current.get(x + 1),
+                        below.get(x),
+                        below.get(x + 1),
+                    ]
+                    .iter()
+                    .filter(|cell| matches!(cell, Some(OccupiedSeat)))
+                    .count(),
+                };
 
-                                if x >= WIDTH {
-                                    return None;
-                                }
-
-                                if *seats.get(y * WIDTH + x)? == Cell::OccupiedSeat {
-                                    Some(())
-                                } else {
-                                    None
-                                }
-                            })
-                            .count()
-                    })
-                    .sum::<usize>();
-
-                let next_col = if col == Cell::EmptySeat && occupied_neighbors == 0 {
-                    Cell::OccupiedSeat
-                } else if occupied_neighbors >= 4 {
-                    Cell::EmptySeat
+                let next_cell = if cell == EmptySeat && occupied_neighbors == 0 {
+                    OccupiedSeat
+                } else if cell == OccupiedSeat && occupied_neighbors >= 4 {
+                    EmptySeat
                 } else {
                     continue;
                 };
 
-                *wot = next_col;
+                *next_cell_spot = next_cell;
             }
+
+            above = current;
+            current = below;
+            below = match rows.next() {
+                Some(below) => below,
+                None => &[],
+            };
         }
 
         if next_seats == seats {
@@ -87,10 +105,7 @@ pub fn solve_part1(seats: &mut [Cell]) -> usize {
         seats.copy_from_slice(&next_seats);
     }
 
-    seats
-        .iter()
-        .filter(|&&cell| cell == Cell::OccupiedSeat)
-        .count()
+    seats.iter().filter(|&&cell| cell == OccupiedSeat).count()
 }
 
 #[inline]
@@ -102,7 +117,7 @@ pub fn solve_part2(seats: &mut [Cell]) -> usize {
 
         for (y, row) in seats.chunks_exact(WIDTH).enumerate() {
             for (x, &col) in row.iter().enumerate() {
-                if col == Cell::Floor {
+                if col == Floor {
                     continue;
                 }
 
@@ -130,7 +145,7 @@ pub fn solve_part2(seats: &mut [Cell]) -> usize {
                                     .map(|(x, y)| seats[y * WIDTH + x])
                                     .find(|&cell| cell != Cell::Floor)
                                 {
-                                    Some(Cell::OccupiedSeat) => Some(()),
+                                    Some(OccupiedSeat) => Some(()),
                                     _ => None,
                                 }
                             })
@@ -138,10 +153,10 @@ pub fn solve_part2(seats: &mut [Cell]) -> usize {
                     })
                     .sum::<usize>();
 
-                let next_col = if col == Cell::EmptySeat && occupied_neighbors == 0 {
-                    Cell::OccupiedSeat
+                let next_col = if col == EmptySeat && occupied_neighbors == 0 {
+                    OccupiedSeat
                 } else if occupied_neighbors >= 5 {
-                    Cell::EmptySeat
+                    EmptySeat
                 } else {
                     continue;
                 };
@@ -157,10 +172,7 @@ pub fn solve_part2(seats: &mut [Cell]) -> usize {
         seats.copy_from_slice(&next_seats);
     }
 
-    seats
-        .iter()
-        .filter(|&&cell| cell == Cell::OccupiedSeat)
-        .count()
+    seats.iter().filter(|&&cell| cell == OccupiedSeat).count()
 }
 
 #[inline]
