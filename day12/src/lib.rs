@@ -100,6 +100,9 @@ pub fn parse_input() -> impl Iterator<Item = Direction> + Clone {
 
 #[inline]
 pub fn solve() -> (isize, isize) {
-    let directions = parse_input();
-    (solve_part1(directions.clone()), solve_part2(directions))
+    let directions = parse_input().collect::<Vec<_>>();
+    (
+        solve_part1(directions.iter().copied()),
+        solve_part2(directions.iter().copied()),
+    )
 }
