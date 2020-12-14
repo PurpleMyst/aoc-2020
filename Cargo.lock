@@ -18,6 +18,7 @@ dependencies = [
  "day11",
  "day12",
  "day13",
+ "day14",
 ]
 
 [[package]]
@@ -303,6 +304,10 @@ version = "0.1.0"
 dependencies = [
  "ring-algorithm",
 ]
+
+[[package]]
+name = "day14"
+version = "0.1.0"
 
 [[package]]
 name = "either"
