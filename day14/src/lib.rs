@@ -8,7 +8,7 @@ const INT_SIZE: usize = 36;
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub enum Instruction {
     Mask { mask: u64, metamask: u64 },
-    Set { index: usize, value: u64 },
+    Set { address: usize, value: u64 },
 }
 
 pub fn solve_part1(instructions: &[Instruction]) -> u64 {
@@ -26,8 +26,8 @@ pub fn solve_part1(instructions: &[Instruction]) -> u64 {
                 metamask = next_metamask;
             }
 
-            Instruction::Set { index, value } => {
-                mem[index] = (value & !metamask) | mask;
+            Instruction::Set { address, value } => {
+                mem[address] = (value & !metamask) | mask;
             }
         }
     }
@@ -81,10 +81,10 @@ pub fn solve_part2(instructions: &[Instruction]) -> u64 {
                 metamask = next_metamask;
             }
 
-            Instruction::Set { index, value } => {
-                let index = index as u64 | mask;
+            Instruction::Set { address, value } => {
+                let address = address as u64 | mask;
 
-                set(&mut memory, metamask, index, value, 0, 0);
+                set(&mut memory, metamask, address, value, 0, 0);
             }
         }
     }
@@ -113,9 +113,9 @@ pub fn parse_input() -> Vec<Instruction> {
                 Instruction::Mask { mask, metamask }
             } else {
                 let mut parts = line[SET_HEADER.len()..].splitn(2, "] = ");
-                let index = parts.next().unwrap().parse::<usize>().unwrap();
+                let address = parts.next().unwrap().parse::<usize>().unwrap();
                 let value = parts.next().unwrap().parse::<u64>().unwrap();
-                Instruction::Set { index, value }
+                Instruction::Set { address, value }
             }
         })
         .collect()
