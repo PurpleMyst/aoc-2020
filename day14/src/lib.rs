@@ -35,35 +35,13 @@ pub fn solve_part1(instructions: &[Instruction]) -> u64 {
     mem.iter().sum()
 }
 
-fn set(memory: &mut HashMap<u64, u64>, metamask: u64, address: u64, value: u64, i: usize, v: u64) {
-    // println!(
-    //     "{} \x1b[{}m{:0width$b}\x1b[0m",
-    //     " ".repeat((0..i).filter(|j| metamask & (1 << j) == 0).count()),
-    //     31 + (i % 10),
-    //     v,
-    //     width = i,
-    // );
-
-    if i == INT_SIZE {
-        memory.insert(v, value);
-        return;
-    }
-
-    if metamask & (1 << i) != 0 {
-        // bit is set
-        set(
-            memory,
-            metamask,
-            address,
-            value,
-            i + 1,
-            v | (address & (1 << i)),
-        )
-    } else {
-        // bit is floaty
-        set(memory, metamask, address, value, i + 1, v);
-        set(memory, metamask, address, value, i + 1, v | (1 << i));
-    }
+fn set(memory: &mut HashMap<u64, u64>, metamask: u64, address: u64, value: u64) {
+    let floaty = !metamask & ((1 << INT_SIZE) - 1);
+    let mut xor = 1 + floaty;
+    (0..1u64 << floaty.count_ones()).for_each(|_| {
+        xor = (xor - 1) & floaty;
+        memory.insert(address ^ xor, value);
+    });
 }
 
 pub fn solve_part2(instructions: &[Instruction]) -> u64 {
@@ -83,8 +61,7 @@ pub fn solve_part2(instructions: &[Instruction]) -> u64 {
 
             Instruction::Set { address, value } => {
                 let address = address as u64 | mask;
-
-                set(&mut memory, metamask, address, value, 0, 0);
+                set(&mut memory, metamask, address, value);
             }
         }
     }
