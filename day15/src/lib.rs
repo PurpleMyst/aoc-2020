@@ -1,36 +1,36 @@
-use std::collections::HashMap;
+use std::mem::replace;
 
 const IDX_PART1: usize = 2020;
 const IDX_PART2: usize = 30_000_000;
+const SEED_LEN: usize = 6;
 
 #[inline]
 pub fn solve() -> (usize, usize) {
     let mut prev = 0;
 
-    let mut last_seen = include_str!("input.txt")
+    let mut last_seen = vec![0; IDX_PART2];
+
+    include_str!("input.txt")
         .trim()
         .split(',')
         .map(|n| n.parse::<usize>().unwrap())
         .enumerate()
-        .map(|(idx, n)| (n, idx + 1))
-        .inspect(|(n, _)| prev = *n)
-        .collect::<HashMap<_, _>>();
+        .inspect(|(_idx, n)| prev = *n)
+        .for_each(|(idx, n)| last_seen[n] = idx + 1);
 
-    last_seen.remove(&prev);
+    let mut sequence = (SEED_LEN..).map(|turn| {
+        let next = match last_seen[prev] {
+            0 => 0,
+            lturn => turn - lturn,
+        };
+        last_seen[prev] = turn;
+        replace(&mut prev, next)
+    });
 
-    for turn in last_seen.len() + 1..IDX_PART1 {
-        let next = last_seen.get(&prev).map_or(0, |lturn| turn - lturn);
-        last_seen.insert(prev, turn);
-        prev = next;
-    }
-    let part1 = prev;
-
-    for turn in IDX_PART1..IDX_PART2 {
-        let next = last_seen.get(&prev).map_or(0, |lturn| turn - lturn);
-        last_seen.insert(prev, turn);
-        prev = next;
-    }
-    let part2 = prev;
+    let part1 = sequence.nth(IDX_PART1 - SEED_LEN).unwrap();
+    let part2 = sequence
+        .nth(IDX_PART2 - (IDX_PART1 - SEED_LEN) - (SEED_LEN + 1))
+        .unwrap();
 
     (part1, part2)
 }
