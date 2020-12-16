@@ -100,10 +100,15 @@ pub fn solve() -> (u16, u64) {
     // For each nearby ticket...
     nearby_tickets.for_each(|ticket| {
         // Sum its invalid fields
-        let invalid_fields = ticket
+        let mut invalid_fields = ticket
             .iter()
-            .filter(|&&field_value| field_ranges_lut[field_value as usize] == 0);
-        part1 += invalid_fields.sum::<u16>();
+            .filter(|&&field_value| field_ranges_lut[field_value as usize] == 0)
+            .peekable();
+
+        if invalid_fields.peek().is_some() {
+            part1 += invalid_fields.sum::<u16>();
+            return;
+        }
 
         // For each field value, AND the bitmasks representing the possible
         // field ranges it fits into with all the previous ones
