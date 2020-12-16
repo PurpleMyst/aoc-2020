@@ -58,8 +58,8 @@ fn parse_ticket(s: &'static str) -> [u16; FIELDS] {
 pub fn solve() -> (u16, u64) {
     let mut sections = include_str!("input.txt").split("\n\n");
 
+    // Parse the individual field ranges
     let mut field_ranges = [FieldRange::default(); FIELDS];
-
     sections
         .next()
         .unwrap()
@@ -82,10 +82,13 @@ pub fn solve() -> (u16, u64) {
                 });
         });
 
+    // Parse our ticket
     let my_ticket = parse_ticket(sections.next().unwrap().lines().nth(1).unwrap());
 
+    // Make an iterator of nearby ticket lines
     let nearby_tickets = sections.next().unwrap().lines().skip(1);
 
+    // Initialize field possibility bitmasks, each field index could be any of the field ranges
     let mut field_possibilities = [(0, (1 << FIELDS) - 1); FIELDS];
     field_possibilities
         .iter_mut()
@@ -96,16 +99,17 @@ pub fn solve() -> (u16, u64) {
 
     // For each nearby ticket...
     nearby_tickets.for_each(|ticket| {
-        // Separate out its fields
+        // Parse it into its fields
         let ticket_fields = parse_ticket(ticket);
 
-        // Build an iterator that only gives iterates over the completely invalid fields
+        // Sum its invalid fields
         let invalid_fields = ticket_fields
             .iter()
             .filter(|&&n| !field_ranges.iter().any(|field| field.is_valid(n)));
         part1 += invalid_fields.sum::<u16>();
 
-        // Now that we know that this ticket is valid, let's use its fields to restrict the possibilities for each field index
+        // For each field value, AND the bitmasks representing the possible
+        // field ranges it fits into with all the previous ones
         ticket_fields
             .iter()
             .zip(field_possibilities.iter_mut())
@@ -114,12 +118,9 @@ pub fn solve() -> (u16, u64) {
             });
     });
 
-    // Take the field possibilities and couple them to their indices, so that we
-    // sort them by how many possibilities they have while retaining index
-    // information
+    // Sort our field possibility bitmasks by how many ones they have
     field_possibilities.sort_by_key(|(_, mask)| mask.count_ones());
 
-    // This mask represents which fields are still unknown
     let mut unknown_fields = (1 << FIELDS) - 1;
 
     let mut part2: u64 = 1;
@@ -133,9 +134,9 @@ pub fn solve() -> (u16, u64) {
         debug_assert_eq!(mask.count_ones(), 1);
         unknown_fields ^= mask;
 
-        // Calculate which field this index is by calculating how many trailing
-        // zeroes the mask has, since the one's position represents which field
-        // this is
+        // Calculate which field range this field index corresponds to by
+        // calculating how many trailing zeroes the mask has, since the one's
+        // position represents which field range this is
         let field_range_idx = mask.trailing_zeros() as usize;
 
         // In my input, the first six fields all start with departure
