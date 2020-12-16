@@ -85,8 +85,8 @@ pub fn solve() -> (u16, u64) {
     // Parse our ticket
     let my_ticket = parse_ticket(sections.next().unwrap().lines().nth(1).unwrap());
 
-    // Make an iterator of nearby ticket lines
-    let nearby_tickets = sections.next().unwrap().lines().skip(1);
+    // Make an iterator of nearby ticket
+    let nearby_tickets = sections.next().unwrap().lines().skip(1).map(parse_ticket);
 
     // Initialize field possibility bitmasks, each field index could be any of the field ranges
     let mut field_possibilities = [(0, (1 << FIELDS) - 1); FIELDS];
@@ -99,27 +99,23 @@ pub fn solve() -> (u16, u64) {
 
     // For each nearby ticket...
     nearby_tickets.for_each(|ticket| {
-        // Parse it into its fields
-        let ticket_fields = parse_ticket(ticket);
-
         // Sum its invalid fields
-        let invalid_fields = ticket_fields
+        let invalid_fields = ticket
             .iter()
-            .filter(|&&n| !field_ranges.iter().any(|field| field.is_valid(n)));
+            .filter(|&&field_value| field_ranges_lut[field_value as usize] == 0);
         part1 += invalid_fields.sum::<u16>();
 
         // For each field value, AND the bitmasks representing the possible
         // field ranges it fits into with all the previous ones
-        ticket_fields
-            .iter()
-            .zip(field_possibilities.iter_mut())
-            .for_each(|(&ticket_field, (_, field_possibility))| {
-                *field_possibility &= field_ranges_lut[ticket_field as usize]
-            });
+        ticket.iter().zip(field_possibilities.iter_mut()).for_each(
+            |(&field_value, (_, field_possibility))| {
+                *field_possibility &= field_ranges_lut[field_value as usize]
+            },
+        );
     });
 
     // Sort our field possibility bitmasks by how many ones they have
-    field_possibilities.sort_by_key(|(_, mask)| mask.count_ones());
+    field_possibilities.sort_by_cached_key(|(_, mask)| mask.count_ones());
 
     let mut unknown_fields = (1 << FIELDS) - 1;
 
