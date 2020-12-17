@@ -34,7 +34,7 @@ pub fn solve() -> (usize, u64) {
         .lines()
         .map(|n| n.parse::<u8>().unwrap())
         .collect::<Vec<_>>();
-    adapters.sort();
+    adapters.sort_unstable();
     adapters.insert(0, 0);
     adapters.push(adapters.last().unwrap() + 3);
 

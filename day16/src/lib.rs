@@ -120,7 +120,7 @@ pub fn solve() -> (u16, u64) {
     });
 
     // Sort our field possibility bitmasks by how many ones they have
-    field_possibilities.sort_by_cached_key(|(_, mask)| mask.count_ones());
+    field_possibilities.sort_unstable_by_key(|(_, mask)| mask.count_ones());
 
     let mut unknown_fields = (1 << FIELDS) - 1;
 
