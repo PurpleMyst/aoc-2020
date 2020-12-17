@@ -1,7 +1,7 @@
 use std::cell::RefCell;
-use std::collections::HashMap;
 
 use itertools::Itertools as _;
+use rustc_hash::FxHashMap as HashMap;
 
 type Bags = HashMap<&'static str, Vec<(usize, &'static str)>>;
 
@@ -15,7 +15,10 @@ struct Solver {
 impl Solver {
     fn new(bags: Bags) -> Self {
         Self {
-            cache: RefCell::new(HashMap::with_capacity(bags.len())),
+            cache: RefCell::new(HashMap::with_capacity_and_hasher(
+                bags.len(),
+                Default::default(),
+            )),
             bags,
         }
     }

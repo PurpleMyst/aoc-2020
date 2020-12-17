@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 
 use itertools::Itertools as _;
 
@@ -76,7 +76,7 @@ impl Interpreter {
             .collect();
 
         Self {
-            executed: HashSet::with_capacity(instructions.len()),
+            executed: HashSet::with_capacity_and_hasher(instructions.len(), Default::default()),
             instructions,
             accumulator: 0,
             pc: 0,
@@ -123,7 +123,7 @@ impl Interpreter {
     /// Starting from the first instruction that would be repeated, iterate, in backwards order,
     /// through the jumps that led there
     pub fn trace_backwards(&mut self) -> impl Iterator<Item = usize> {
-        let mut jump_source = HashMap::new();
+        let mut jump_source = HashMap::default();
 
         while self.executed.insert(self.pc) {
             match self.instructions.get(self.pc) {

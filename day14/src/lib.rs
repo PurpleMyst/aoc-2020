@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use rustc_hash::FxHashMap as HashMap;
 
 const MASK_HEADER: &str = "mask = ";
 const SET_HEADER: &str = "mem[";
@@ -45,7 +45,7 @@ fn set(memory: &mut HashMap<u64, u64>, metamask: u64, address: u64, value: u64) 
 }
 
 pub fn solve_part2(instructions: &[Instruction]) -> u64 {
-    let mut memory = HashMap::with_capacity(1 << 16);
+    let mut memory = HashMap::with_capacity_and_hasher(1 << 16, Default::default());
 
     let mut mask = 0;
     let mut metamask = 0;
