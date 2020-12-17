@@ -57,10 +57,14 @@ pub fn solve_part2(initial_state: &[(i64, i64)]) -> usize {
         .map(|&(x, y)| (x, y, 0, 0))
         .collect::<HashSet<_>>();
 
-    let mut new_peeps = Vec::new();
+    let mut new_peeps = HashSet::new();
     let mut unalive: HashMap<_, usize> = HashMap::new();
 
     for _ in 0..6 {
+        new_peeps.clear();
+        new_peeps.reserve(map.len() * 2);
+        unalive.reserve(map.len() * 8);
+
         for &(x, y, z, w) in &map {
             let mut active_neighbors = 0;
             for dx in -1..=1 {
@@ -83,7 +87,7 @@ pub fn solve_part2(initial_state: &[(i64, i64)]) -> usize {
             }
 
             if active_neighbors == 2 || active_neighbors == 3 {
-                new_peeps.push((x, y, z, w))
+                new_peeps.insert((x, y, z, w));
             }
         }
 
@@ -94,8 +98,7 @@ pub fn solve_part2(initial_state: &[(i64, i64)]) -> usize {
                 .map(|(pos, _)| pos),
         );
 
-        map.clear();
-        map.extend(new_peeps.drain(..));
+        map.clone_from(&new_peeps);
     }
 
     map.len()
