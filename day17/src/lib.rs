@@ -1,10 +1,10 @@
 use std::collections::{HashMap, HashSet};
 
 #[inline]
-pub fn solve_part1(initial_state: &[(i64, i64)]) -> usize {
+pub fn solve_part1(initial_state: &[(i8, i8)]) -> usize {
     let mut map = initial_state
         .iter()
-        .map(|&(x, y)| (x, y, 0))
+        .map(|&(x, y)| (x, y, 0i8))
         .collect::<HashSet<_>>();
 
     let mut new_peeps = Vec::new();
@@ -51,10 +51,10 @@ pub fn solve_part1(initial_state: &[(i64, i64)]) -> usize {
 }
 
 #[inline]
-pub fn solve_part2(initial_state: &[(i64, i64)]) -> usize {
+pub fn solve_part2(initial_state: &[(i8, i8)]) -> usize {
     let mut map = initial_state
         .iter()
-        .map(|&(x, y)| (x, y, 0, 0))
+        .map(|&(x, y)| (x, y, 0i8, 0i8))
         .collect::<HashSet<_>>();
 
     let mut new_peeps = HashSet::new();
@@ -105,7 +105,7 @@ pub fn solve_part2(initial_state: &[(i64, i64)]) -> usize {
 }
 
 #[inline]
-pub fn parse_input() -> Vec<(i64, i64)> {
+pub fn parse_input() -> Vec<(i8, i8)> {
     include_str!("input.txt")
         .trim()
         .lines()
@@ -113,7 +113,7 @@ pub fn parse_input() -> Vec<(i64, i64)> {
         .flat_map(|(y, row)| {
             row.bytes().enumerate().filter_map(move |(x, ch)| {
                 if ch == b'#' {
-                    Some((x as i64, y as i64))
+                    Some((x as i8, y as i8))
                 } else {
                     None
                 }
