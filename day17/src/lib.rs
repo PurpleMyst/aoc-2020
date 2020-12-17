@@ -1,5 +1,7 @@
 use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 
+const GENERATIONS: usize = 6;
+
 #[inline]
 pub fn solve_part1(initial_state: &[(i8, i8)]) -> usize {
     let mut map = initial_state
@@ -10,7 +12,7 @@ pub fn solve_part1(initial_state: &[(i8, i8)]) -> usize {
     let mut new_peeps = Vec::new();
     let mut unalive: HashMap<_, usize> = HashMap::default();
 
-    for _ in 0..6 {
+    for _ in 0..GENERATIONS {
         for &(x, y, z) in &map {
             let mut active_neighbors = 0;
             for dx in -1..=1 {
@@ -60,7 +62,7 @@ pub fn solve_part2(initial_state: &[(i8, i8)]) -> usize {
     let mut new_peeps = HashSet::default();
     let mut unalive: HashMap<_, usize> = HashMap::default();
 
-    for _ in 0..6 {
+    for _ in 0..GENERATIONS {
         new_peeps.clear();
         new_peeps.reserve(map.len() * 2);
         unalive.reserve(map.len() * 8);
