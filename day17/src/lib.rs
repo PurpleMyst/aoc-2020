@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 
 #[inline]
 pub fn solve_part1(initial_state: &[(i8, i8)]) -> usize {
@@ -8,7 +8,7 @@ pub fn solve_part1(initial_state: &[(i8, i8)]) -> usize {
         .collect::<HashSet<_>>();
 
     let mut new_peeps = Vec::new();
-    let mut unalive: HashMap<_, usize> = HashMap::new();
+    let mut unalive: HashMap<_, usize> = HashMap::default();
 
     for _ in 0..6 {
         for &(x, y, z) in &map {
@@ -57,8 +57,8 @@ pub fn solve_part2(initial_state: &[(i8, i8)]) -> usize {
         .map(|&(x, y)| (x, y, 0i8, 0i8))
         .collect::<HashSet<_>>();
 
-    let mut new_peeps = HashSet::new();
-    let mut unalive: HashMap<_, usize> = HashMap::new();
+    let mut new_peeps = HashSet::default();
+    let mut unalive: HashMap<_, usize> = HashMap::default();
 
     for _ in 0..6 {
         new_peeps.clear();
