@@ -161,7 +161,5 @@ pub fn solve() -> (u64, u64) {
         .map(|line| AdvancedParser::new(line).expr(true))
         .sum::<u64>();
 
-    assert!(part2 > 428254440772016);
-
     (part1, part2)
 }
