@@ -157,15 +157,13 @@ impl AdvancedParser {
 
 #[inline]
 pub fn solve() -> (u64, u64) {
-    let part1 = include_str!("input.txt")
-        .lines()
-        .map(|line| SimpleParser::new(line).expr())
-        .sum::<u64>();
+    let mut part1 = 0;
+    let mut part2 = 0;
 
-    let part2 = include_str!("input.txt")
-        .lines()
-        .map(|line| AdvancedParser::new(line).expr(true))
-        .sum::<u64>();
+    for line in include_str!("input.txt").lines() {
+        part1 += SimpleParser::new(line).expr();
+        part2 += AdvancedParser::new(line).expr(true);
+    }
 
     (part1, part2)
 }
