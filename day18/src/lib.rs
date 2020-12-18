@@ -4,35 +4,41 @@ enum Op {
 }
 
 struct SimpleParser {
-    line: &'static str,
+    line: &'static [u8],
 }
 
 impl SimpleParser {
     fn new(line: &'static str) -> Self {
-        Self { line }
-    }
-
-    fn skip_one(&mut self) {
-        if !self.line.is_empty() {
-            self.line = &self.line[1..];
+        Self {
+            line: line.as_bytes(),
         }
     }
 
+    fn skip(&mut self, n: usize) {
+        self.line = &self.line[n.min(self.line.len())..];
+    }
+
     fn num(&mut self) -> u64 {
-        let idx = self
-            .line
-            .find(|ch: char| !ch.is_numeric())
-            .unwrap_or(self.line.len());
+        let mut n = 0;
 
-        let (n, nline) = self.line.split_at(idx);
-        self.line = nline;
+        loop {
+            let ch = match self.line.first() {
+                Some(&ch) => ch,
+                None => break n,
+            };
 
-        n.parse().unwrap()
+            if ch >= b'0' && ch <= b'9' {
+                n = 10 * n + u64::from(ch - b'0');
+                self.skip(1);
+            } else {
+                break n;
+            }
+        }
     }
 
     fn atom(&mut self) -> u64 {
-        if self.line.starts_with('(') {
-            self.skip_one();
+        if self.line[0] == b'(' {
+            self.skip(1);
             self.expr()
         } else {
             self.num()
@@ -40,16 +46,13 @@ impl SimpleParser {
     }
 
     fn op(&mut self) -> Op {
-        self.skip_one();
-        let op = if self.line.starts_with('+') {
-            Op::Add
-        } else if self.line.starts_with('*') {
-            Op::Mul
-        } else {
-            unreachable!()
+        self.skip(1);
+        let op = match self.line[0] {
+            b'+' => Op::Add,
+            b'*' => Op::Mul,
+            _ => unreachable!(),
         };
-        self.skip_one();
-        self.skip_one();
+        self.skip(2);
         op
     }
 
@@ -57,9 +60,9 @@ impl SimpleParser {
         let mut acc = self.atom();
 
         loop {
-            if self.line.starts_with(')') || self.line.is_empty() {
-                self.skip_one();
-                return acc;
+            if self.line.is_empty() || self.line[0] == b')' {
+                self.skip(1);
+                break acc;
             }
 
             let op = self.op();
@@ -74,35 +77,41 @@ impl SimpleParser {
 }
 
 struct AdvancedParser {
-    line: &'static str,
+    line: &'static [u8],
 }
 
 impl AdvancedParser {
     fn new(line: &'static str) -> Self {
-        Self { line }
-    }
-
-    fn skip_one(&mut self) {
-        if !self.line.is_empty() {
-            self.line = &self.line[1..];
+        Self {
+            line: line.as_bytes(),
         }
     }
 
+    fn skip(&mut self, n: usize) {
+        self.line = &self.line[n.min(self.line.len())..];
+    }
+
     fn num(&mut self) -> u64 {
-        let idx = self
-            .line
-            .find(|ch: char| !ch.is_numeric())
-            .unwrap_or(self.line.len());
+        let mut n = 0;
 
-        let (n, nline) = self.line.split_at(idx);
-        self.line = nline;
+        loop {
+            let ch = match self.line.first() {
+                Some(&ch) => ch,
+                None => break n,
+            };
 
-        n.parse().unwrap()
+            if ch >= b'0' && ch <= b'9' {
+                n = 10 * n + u64::from(ch - b'0');
+                self.skip(1);
+            } else {
+                break n;
+            }
+        }
     }
 
     fn atom(&mut self) -> u64 {
-        if self.line.starts_with('(') {
-            self.skip_one();
+        if self.line[0] == b'(' {
+            self.skip(1);
             self.expr(true)
         } else {
             self.num()
@@ -110,16 +119,13 @@ impl AdvancedParser {
     }
 
     fn op(&mut self) -> Op {
-        self.skip_one();
-        let op = if self.line.starts_with('+') {
-            Op::Add
-        } else if self.line.starts_with('*') {
-            Op::Mul
-        } else {
-            unreachable!()
+        self.skip(1);
+        let op = match self.line[0] {
+            b'+' => Op::Add,
+            b'*' => Op::Mul,
+            _ => unreachable!(),
         };
-        self.skip_one();
-        self.skip_one();
+        self.skip(2);
         op
     }
 
@@ -127,9 +133,9 @@ impl AdvancedParser {
         let mut acc = self.atom();
 
         loop {
-            if self.line.starts_with(')') || self.line.is_empty() {
+            if self.line.is_empty() || self.line[0] == b')' {
                 if eat {
-                    self.skip_one();
+                    self.skip(1);
                 }
                 break acc;
             }
