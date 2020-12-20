@@ -3,3 +3,6 @@ name = "day19"
 version = "0.1.0"
 authors = ["PurpleMyst <PurpleMyst@users.noreply.github.com>"]
 edition = "2018"
+
+[dependencies]
+arrayvec = "0.5.2"

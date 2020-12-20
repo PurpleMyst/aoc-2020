@@ -2,11 +2,13 @@ use std::{debug_assert_eq, hint::unreachable_unchecked, mem::MaybeUninit};
 
 // POSSIBLE OPTIMIZATION: we're not really iterating over strings, just bits where "a" is 0 and "b" is 1
 
+use arrayvec::ArrayVec;
+
 #[derive(Clone)]
 enum Rule {
     Terminator(char),
-    Seq(Vec<u8>),
-    Or(Vec<u8>, Vec<u8>),
+    Seq(ArrayVec<[u8; 2]>),
+    Or(ArrayVec<[u8; 2]>, ArrayVec<[u8; 2]>),
 }
 
 type Rules = [Option<Rule>; 0xFF];
@@ -20,12 +22,16 @@ fn parse_rule(rule: &'static str) -> Rule {
         return Rule::Terminator(rule.chars().nth(1).unwrap());
     }
 
-    let fst = parts
+    let fst: ArrayVec<[u8; 2]> = parts
         .by_ref()
         .take_while(|&part| part != "|")
         .map(|part| part.parse().unwrap())
         .collect();
-    let snd: Vec<_> = parts.map(|part| part.parse().unwrap()).collect();
+
+    let snd: ArrayVec<[u8; 2]> = parts
+        .filter(|&part| part != "|")
+        .map(|part| part.parse().unwrap())
+        .collect();
 
     if !snd.is_empty() {
         Rule::Or(fst, snd)
