@@ -6,7 +6,7 @@ use arrayvec::ArrayVec;
 
 #[derive(Clone)]
 enum Rule {
-    Terminator(char),
+    Terminator(bool),
     Seq(ArrayVec<[u8; 2]>),
     Or(ArrayVec<[u8; 2]>, ArrayVec<[u8; 2]>),
 }
@@ -19,7 +19,8 @@ fn parse_rule(rule: &'static str) -> Rule {
     if rule.starts_with('"') {
         debug_assert!(rule.ends_with('"'));
         debug_assert_eq!(rule.len(), 3);
-        return Rule::Terminator(rule.chars().nth(1).unwrap());
+        debug_assert!(rule == "\"b\"" || rule == "\"a\"");
+        return Rule::Terminator(rule == "\"b\"");
     }
 
     let fst: ArrayVec<[u8; 2]> = parts
@@ -40,16 +41,16 @@ fn parse_rule(rule: &'static str) -> Rule {
     }
 }
 
-fn matches_seq<'a>(rules: &Rules, seq: &[u8], line: &'a str) -> Option<&'a str> {
+fn matches_seq<'a>(rules: &Rules, seq: &[u8], line: &'a [u8]) -> Option<&'a [u8]> {
     seq.iter()
         .try_fold(line, |acc, &rule| matches_by_idx(rules, rule, acc))
 }
 
-fn matches_by_idx<'a>(rules: &Rules, rule: u8, line: &'a str) -> Option<&'a str> {
+fn matches_by_idx<'a>(rules: &Rules, rule: u8, line: &'a [u8]) -> Option<&'a [u8]> {
     match rules[rule as usize].as_ref() {
-        Some(Rule::Terminator(ch)) => {
-            if line.starts_with(*ch) {
-                Some(&line[ch.len_utf8()..])
+        Some(Rule::Terminator(b)) => {
+            if !line.is_empty() && ((line[0] & 1) == 0) == *b {
+                Some(&line[1..])
             } else {
                 None
             }
@@ -93,9 +94,9 @@ pub fn solve() -> (usize, usize) {
     let mut part1 = 0;
     let mut part2 = 0;
 
-    input.for_each(|mut line| {
+    input.map(str::as_bytes).for_each(|mut line| {
         // Part 1: Straight up regex match
-        if matches_by_idx(&rules, 0, line) == Some("") {
+        if matches_by_idx(&rules, 0, line) == Some(b"") {
             part1 += 1;
         }
 
