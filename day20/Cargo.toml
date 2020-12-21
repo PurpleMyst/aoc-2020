@@ -1,0 +1,9 @@
+[package]
+name = "day20"
+version = "0.1.0"
+authors = ["PurpleMyst <PurpleMyst@users.noreply.github.com>"]
+edition = "2018"
+
+[dependencies]
+im = { version = "15.0.0", package = "im-rc" }
+array_iterator = "1.2.0"
