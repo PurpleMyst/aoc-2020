@@ -142,7 +142,11 @@ pub fn day19_benchmark(c: &mut Criterion) {
 }
 
 pub fn day20_benchmark(c: &mut Criterion) {
-    c.bench_function("day20", |b| b.iter(|| day20::solve()));
+    let mut group = c.benchmark_group("day20");
+    group.sampling_mode(criterion::SamplingMode::Flat);
+    group.sample_size(15);
+    group.bench_function("solve", |b| b.iter(|| day20::solve()));
+    group.finish()
 }
 
 pub fn alldays_benchmark(c: &mut Criterion) {
