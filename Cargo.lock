@@ -25,6 +25,7 @@ dependencies = [
  "day18",
  "day19",
  "day20",
+ "day21",
 ]
 
 [[package]]
@@ -373,6 +374,13 @@ version = "0.1.0"
 dependencies = [
  "array_iterator",
  "im-rc",
+]
+
+[[package]]
+name = "day21"
+version = "0.1.0"
+dependencies = [
+ "rustc-hash",
 ]
 
 [[package]]
