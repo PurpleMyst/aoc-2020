@@ -1,8 +1,9 @@
 use array_iterator::ArrayIterator;
 use im::Vector as ImVec;
 
+use crate::part1::State;
 use crate::tile::Tile;
-use crate::{State, BOTTOM, LEFT, RIGHT, TOP};
+use crate::{BOTTOM, LEFT, RIGHT, TOP};
 
 pub(crate) trait SideFiller {
     fn initial_parent(width: usize, height: usize) -> usize;
@@ -130,6 +131,10 @@ pub(crate) fn fill_side<SF: SideFiller>(
                 .copied()
                 .enumerate()
                 .flat_map(|(candidate_idx, candidate)| {
+                    // Possible optimization:
+                    // we can be smarter about finding
+                    // which tiles fit and how, we don't need to check 8
+                    // possibilities every time
                     ArrayIterator::new(candidate.possible_transformations())
                         .filter(|candidate| {
                             // Does this fit with the parent?
