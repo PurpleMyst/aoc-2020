@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
 
 pub fn day01_benchmark(c: &mut Criterion) {
     c.bench_function("day01", |b| b.iter(|| day01::solve()));
@@ -173,6 +173,10 @@ pub fn day23_benchmark(c: &mut Criterion) {
     group.finish()
 }
 
+pub fn day24_benchmark(c: &mut Criterion) {
+    c.bench_function("day24", |b| b.iter(|| day24::solve()));
+}
+
 pub fn alldays_benchmark(c: &mut Criterion) {
     c.bench_function("all", |b| {
         b.iter(|| {
@@ -200,6 +204,7 @@ pub fn alldays_benchmark(c: &mut Criterion) {
                 day21::solve(),
                 day22::solve(),
                 day23::solve(),
+                day24::solve(),
             )
         })
     });
@@ -239,6 +244,7 @@ criterion_group! {
         day21_benchmark,
         day22_benchmark,
         day23_benchmark,
+        day24_benchmark,
         alldays_benchmark
 }
 

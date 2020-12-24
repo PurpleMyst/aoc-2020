@@ -28,6 +28,7 @@ dependencies = [
  "day21",
  "day22",
  "day23",
+ "day24",
 ]
 
 [[package]]
@@ -394,6 +395,13 @@ name = "day23"
 version = "0.1.0"
 dependencies = [
  "num-traits",
+]
+
+[[package]]
+name = "day24"
+version = "0.1.0"
+dependencies = [
+ "rustc-hash",
 ]
 
 [[package]]
