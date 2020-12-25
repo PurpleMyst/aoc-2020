@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import pathlib
 import subprocess
@@ -6,6 +7,7 @@ import webbrowser
 import requests
 import toml
 
+DESCRIPTION = "Start solving an Advent of Code day"
 
 MAIN = """fn main() {{
     let (part1, part2) = {crate}::solve();
@@ -21,8 +23,29 @@ pub fn solve() -> (T, T) {{
 
 def main() -> None:
     now = datetime.datetime.now()
-    day = now.day
-    year = now.year
+    default_day = now.day
+    default_year = now.year
+
+    argp = argparse.ArgumentParser(description=DESCRIPTION)
+    argp.add_argument(
+        "-d",
+        "--day",
+        type=int,
+        choices=range(1, 25 + 1),
+        default=default_day,
+        required=False,
+    )
+    argp.add_argument(
+        "-y",
+        "--year",
+        type=int,
+        choices=range(2015, default_year + 1),
+        default=default_year,
+        required=False,
+    )
+    argv = argp.parse_args()
+    day: int = argv.day
+    year: int = argv.year
 
     crate = f"day{day:02}"
     crate_path = pathlib.Path(crate)
