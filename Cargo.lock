@@ -408,6 +408,9 @@ dependencies = [
 [[package]]
 name = "day25"
 version = "0.1.0"
+dependencies = [
+ "rustc-hash",
+]
 
 [[package]]
 name = "either"
