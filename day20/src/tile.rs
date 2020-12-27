@@ -2,14 +2,24 @@ use std::fmt::Display;
 
 use static_assert_macro::static_assert;
 
+// TODO: optimize rotate_ccw and flip_vertically
+
 const ON: u8 = b'#';
 pub(crate) const TILE_SIDE: usize = 10;
 
+const TOP: usize = 0;
+const LEFT: usize = 1;
+const RIGHT: usize = 2;
+const BOTTOM: usize = 3;
+
+// Requirement to be able to use exactly an u8 to store interior
+static_assert!(8 == TILE_SIDE - 2);
+
 #[derive(Debug, Clone, Copy)]
 pub struct Tile {
-    pub(crate) id: u16,
-    pub(crate) edges: [u16; 4],
-    pub(crate) interior: [u8; TILE_SIDE - 2],
+    pub id: u16,
+    pub edges: [u16; 4],
+    pub interior: [u8; TILE_SIDE - 2],
 }
 
 impl PartialEq for Tile {
@@ -19,6 +29,11 @@ impl PartialEq for Tile {
 }
 
 impl Eq for Tile {}
+
+/// Reverse the bits of a 10-bit unsigned integer
+fn reverse_10bits(x: u16) -> u16 {
+    x.reverse_bits() >> (16 - 10)
+}
 
 impl Tile {
     pub fn from_input(input: &str) -> Self {
@@ -79,14 +94,13 @@ impl Tile {
 
         Self {
             id,
-            edges: [
-                top.reverse_bits() >> (16 - 10),
-                right,
-                left,
-                bottom.reverse_bits() >> (16 - 10),
-            ],
+            edges: [reverse_10bits(top), right, left, reverse_10bits(bottom)],
             interior,
         }
+    }
+
+    pub fn flip_vertically(self) -> Self {
+        self.rotate_cw().flip_horizontally().rotate_ccw()
     }
 
     pub(crate) fn rotate_cw(self) -> Self {
@@ -131,17 +145,87 @@ impl Tile {
 
         Self {
             id,
-            edges: [
-                left.reverse_bits() >> (16 - 10),
-                bottom,
-                top,
-                right.reverse_bits() >> (16 - 10),
-            ],
+            edges: [reverse_10bits(left), bottom, top, reverse_10bits(right)],
             interior,
         }
     }
 
-    pub(crate) fn possible_transformations(self) -> [Self; 8] {
+    pub(crate) fn rotate_ccw(self) -> Self {
+        self.rotate_cw().rotate_cw().rotate_cw()
+    }
+
+    pub fn could_fit(&self, other: &Self) -> bool {
+        other
+            .edges
+            .iter()
+            .any(|&edge| self.edges.contains(&edge) || self.edges.contains(&reverse_10bits(edge)))
+    }
+
+    /// Rotate the given tile so that it fits on the right
+    pub fn fit_right(&self, other: Self) -> Option<Self> {
+        let edge_value = self.edges[RIGHT];
+
+        // our right edge must line with their left edge
+        if let Some(edge) = other.edges.iter().position(|&e| e == edge_value) {
+            Some(match edge {
+                TOP => other.rotate_ccw().flip_vertically(),
+                LEFT => other,
+                RIGHT => other.flip_horizontally(),
+                BOTTOM => other.rotate_cw(),
+
+                _ => unreachable!(),
+            })
+        } else if let Some(edge) = other
+            .edges
+            .iter()
+            .position(|&e| reverse_10bits(e) == edge_value)
+        {
+            Some(match edge {
+                TOP => other.rotate_ccw(),
+                LEFT => other.flip_vertically(),
+                RIGHT => other.flip_horizontally().flip_vertically(),
+                BOTTOM => other.rotate_cw().flip_vertically(),
+
+                _ => unreachable!(),
+            })
+        } else {
+            None
+        }
+    }
+
+    /// Rotate the given tile so that it fits on the bottom
+    pub fn fit_down(&self, other: Self) -> Option<Self> {
+        let edge_value = self.edges[BOTTOM];
+
+        // our bottom edge must line with their top edge
+        if let Some(edge) = other.edges.iter().position(|&e| e == edge_value) {
+            Some(match edge {
+                TOP => other,
+                LEFT => other.rotate_cw().flip_horizontally(),
+                RIGHT => other.rotate_ccw(),
+                BOTTOM => other.flip_vertically(),
+
+                _ => unreachable!(),
+            })
+        } else if let Some(edge) = other
+            .edges
+            .iter()
+            .position(|&e| reverse_10bits(e) == edge_value)
+        {
+            Some(match edge {
+                TOP => other.flip_horizontally(),
+                LEFT => other.rotate_cw(),
+                RIGHT => other.rotate_ccw().flip_horizontally(),
+                BOTTOM => other.flip_vertically().flip_horizontally(),
+
+                _ => unreachable!(),
+            })
+        } else {
+            None
+        }
+    }
+
+    pub fn possible_transformations(self) -> [Self; 8] {
         [
             self,
             self.rotate_cw(),
@@ -173,12 +257,22 @@ impl Display for Tile {
             } else {
                 "."
             };
+            write!(f, "{}", l)?;
+
+            let interior = self.interior[i - 1];
+            for j in (0..8).rev() {
+                let ch = if interior & (1 << j) != 0 { "#" } else { "." };
+                write!(f, "{}", ch)?;
+            }
+
             let r = if self.edges[2] & (1 << i) != 0 {
                 "#"
             } else {
                 "."
             };
-            writeln!(f, "{}        {}", l, r)?;
+            write!(f, "{}", r)?;
+
+            writeln!(f)?;
         }
 
         writeln!(

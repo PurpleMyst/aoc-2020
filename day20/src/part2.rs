@@ -1,4 +1,4 @@
-use im::Vector as ImVec;
+use array_iterator::ArrayIterator;
 use static_assert_macro::static_assert;
 
 use super::IMAGE_SIDE;
@@ -9,9 +9,11 @@ const SEAMONSTER_MID: u128 = 0b10000110000110000111;
 const SEAMONSTER_BTM: u128 = 0b01001001001001001000;
 
 const SEAMONSTER_WIDTH: usize = 20;
-pub(crate) const SEAMONSTER_AREA: u32 =
-    SEAMONSTER_TOP.count_ones() + SEAMONSTER_MID.count_ones() + SEAMONSTER_BTM.count_ones();
+pub(crate) const SEAMONSTER_AREA: usize = (SEAMONSTER_TOP.count_ones()
+    + SEAMONSTER_MID.count_ones()
+    + SEAMONSTER_BTM.count_ones()) as usize;
 
+static_assert!((TILE_SIDE - 2) * IMAGE_SIDE <= 128);
 pub(crate) type InteriorImage = [u128; IMAGE_SIDE * (TILE_SIDE - 2)];
 
 fn rotate_cw(mut interior: InteriorImage) -> InteriorImage {
@@ -65,7 +67,7 @@ fn flip_horizontally(mut interior: InteriorImage) -> InteriorImage {
     interior
 }
 
-pub(crate) fn possible_transformations(interior: InteriorImage) -> [InteriorImage; 8] {
+fn possible_transformations(interior: InteriorImage) -> [InteriorImage; 8] {
     [
         interior,
         rotate_cw(interior),
@@ -78,11 +80,9 @@ pub(crate) fn possible_transformations(interior: InteriorImage) -> [InteriorImag
     ]
 }
 
-pub(crate) fn load_interiors(shape: &ImVec<Tile>) -> InteriorImage {
-    static_assert!((TILE_SIDE - 2) * IMAGE_SIDE <= 128);
-
+fn load_interiors(shape: [Tile; IMAGE_SIDE * IMAGE_SIDE]) -> InteriorImage {
     let mut result = [0u128; IMAGE_SIDE * (TILE_SIDE - 2)];
-    let mut shape = shape.into_iter();
+    let mut shape = shape.iter();
 
     result.chunks_exact_mut(TILE_SIDE - 2).for_each(|row| {
         shape
@@ -99,7 +99,7 @@ pub(crate) fn load_interiors(shape: &ImVec<Tile>) -> InteriorImage {
     result
 }
 
-pub(crate) fn count_seamonsters(map: InteriorImage) -> usize {
+fn count_seamonsters(map: InteriorImage) -> usize {
     let mut cnt = 0;
 
     for window in map.windows(3) {
@@ -119,4 +119,18 @@ pub(crate) fn count_seamonsters(map: InteriorImage) -> usize {
     }
 
     cnt
+}
+
+pub(crate) fn solve_part2(shape: [Tile; IMAGE_SIDE * IMAGE_SIDE]) -> usize {
+    ArrayIterator::new(possible_transformations(load_interiors(shape)))
+        .find_map(|map| match count_seamonsters(map) {
+            0 => None,
+            monsters => Some(
+                map.iter()
+                    .map(|row| row.count_ones() as usize)
+                    .sum::<usize>()
+                    - monsters * SEAMONSTER_AREA,
+            ),
+        })
+        .unwrap()
 }

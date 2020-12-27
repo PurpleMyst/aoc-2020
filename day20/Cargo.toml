@@ -5,6 +5,5 @@ authors = ["PurpleMyst <PurpleMyst@users.noreply.github.com>"]
 edition = "2018"
 
 [dependencies]
-im = { version = "15.0.0", package = "im-rc" }
 array_iterator = "1.2.0"
 static_assert_macro = "1.1.0"

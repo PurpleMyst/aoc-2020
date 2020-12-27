@@ -1,68 +1,32 @@
-use array_iterator::ArrayIterator;
-use im::Vector as ImVec;
+use std::mem::{transmute, MaybeUninit};
 
-use crate::side_filler::*;
 use crate::tile::Tile;
 
-#[derive(Debug)]
-pub(crate) struct State {
-    pub(crate) remaining: ImVec<Tile>,
-    pub(crate) next_shape: ImVec<Tile>,
-    pub(crate) parent_pos: usize,
-    pub(crate) previous: Option<Tile>,
-}
+/// Find the corners of the image by taking advantage of the constraint that
+/// "the outermost edges won't line up with any other tiles."
+pub(crate) fn find_corners(tiles: &[Tile]) -> ([usize; 4], [Tile; 4]) {
+    let mut indices = [0; 4];
 
-/// Fill out a given state to form the next biggest square
-fn next_squares(
-    remaining: ImVec<Tile>,
-    shape: ImVec<Tile>,
-    side: usize,
-) -> impl Iterator<Item = State> {
-    assert_eq!(shape.len(), side * side);
-    let rs = fill_side::<RightSideFiller>(remaining, shape, side, side);
+    let mut corners: [MaybeUninit<Tile>; 4] = unsafe { MaybeUninit::uninit().assume_init() };
 
-    rs.into_iter().flat_map(move |state| {
-        fill_side::<BottomSideFiller>(state.remaining, state.next_shape, side + 1, side)
-    })
-}
-
-/// Given a set of tiles, find a square which uses them all and return it
-pub(crate) fn find_image(tiles: ImVec<Tile>) -> ImVec<Tile> {
-    let mut states = tiles
+    tiles
         .iter()
+        .copied()
         .enumerate()
-        .flat_map(|(idx, &seed)| {
-            ArrayIterator::new(seed.possible_transformations()).map(move |seed| (idx, seed))
+        .filter(|&(idx, tile)| {
+            tiles
+                .iter()
+                .take(idx)
+                .chain(tiles.iter().skip(idx + 1))
+                .filter(|other| tile.could_fit(other))
+                .count()
+                == 2
         })
-        .map(|(idx, seed)| {
-            let mut remaining = tiles.clone();
-            remaining.remove(idx);
-            let next_shape = ImVec::unit(seed);
-            State {
-                remaining,
-                next_shape,
-                parent_pos: 0,
-                previous: None,
-            }
-        })
-        .collect::<Vec<_>>();
+        .zip(indices.iter_mut().zip(corners.iter_mut()))
+        .for_each(|((idx, tile), (idx_dest, tile_dest))| {
+            *idx_dest = idx;
+            *tile_dest = MaybeUninit::new(tile);
+        });
 
-    for side in 1.. {
-        if states.is_empty() {
-            break;
-        }
-
-        let (mut finished, next): (Vec<_>, Vec<_>) = states
-            .drain(..)
-            .flat_map(|state| next_squares(state.remaining, state.next_shape, side))
-            .partition(|state| state.remaining.is_empty());
-
-        if let Some(winner) = finished.pop() {
-            return winner.next_shape;
-        }
-
-        states = next;
-    }
-
-    unreachable!()
+    (indices, unsafe { transmute(corners) })
 }
