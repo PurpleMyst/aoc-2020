@@ -34,9 +34,9 @@ pub fn solve() -> (usize, Part2) {
 
         for allergen in allergens {
             match allergen_possibilities.entry(allergen) {
-                Entry::Occupied(mut entry) => {
-                    entry.get_mut().retain(|foo| ingredients.contains(foo))
-                }
+                Entry::Occupied(mut entry) => entry
+                    .get_mut()
+                    .retain(|ingredient| ingredients.contains(ingredient)),
 
                 Entry::Vacant(entry) => {
                     entry.insert(ingredients.clone());
@@ -62,7 +62,7 @@ pub fn solve() -> (usize, Part2) {
     while let Some((&allergen, ingredient)) =
         allergen_possibilities.iter().find(|(_, vs)| vs.len() == 1)
     {
-        let ingredient = *ingredient.into_iter().next().unwrap();
+        let ingredient = *ingredient.iter().next().unwrap();
 
         ingredients.push((ingredient, allergen));
 

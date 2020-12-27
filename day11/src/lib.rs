@@ -92,10 +92,7 @@ pub fn solve_part1(seats: &mut [Cell]) -> usize {
 
             above = current;
             current = below;
-            below = match rows.next() {
-                Some(below) => below,
-                None => &[],
-            };
+            below = rows.next().unwrap_or(&[]);
         }
 
         if next_seats == seats {

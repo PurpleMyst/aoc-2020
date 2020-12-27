@@ -33,10 +33,10 @@ fn calculate_score(deck: &VecDeque<u8>) -> usize {
 }
 
 pub fn solve_part1(mut player1: VecDeque<u8>, mut player2: VecDeque<u8>) -> usize {
-    while player1.len() != 0 && player2.len() != 0 {
+    while !player1.is_empty() && !player2.is_empty() {
         play_combat(&mut player1, &mut player2);
     }
-    let winner = if player1.len() == 0 { player2 } else { player1 };
+    let winner = if player1.is_empty() { player2 } else { player1 };
     calculate_score(&winner)
 }
 
@@ -86,14 +86,12 @@ impl RecursiveCombatPlayer {
                 }
                 Winner::None => unreachable!(),
             }
+        } else if card1 > card2 {
+            self.player1.push_back(card1);
+            self.player1.push_back(card2);
         } else {
-            if card1 > card2 {
-                self.player1.push_back(card1);
-                self.player1.push_back(card2);
-            } else {
-                self.player2.push_back(card2);
-                self.player2.push_back(card1);
-            }
+            self.player2.push_back(card2);
+            self.player2.push_back(card1);
         }
 
         Winner::None
@@ -102,13 +100,13 @@ impl RecursiveCombatPlayer {
     // p1 won = true
     // p2 won = false
     fn play_game(&mut self) -> Winner {
-        while self.player1.len() != 0 && self.player2.len() != 0 {
+        while !self.player1.is_empty() && !self.player2.is_empty() {
             match self.play_round() {
                 Winner::None => {}
                 winner => return winner,
             }
         }
-        if self.player1.len() != 0 {
+        if !self.player1.is_empty() {
             Winner::Player1
         } else {
             Winner::Player2

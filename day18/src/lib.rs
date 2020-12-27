@@ -27,7 +27,7 @@ impl SimpleParser {
                 None => break n,
             };
 
-            if ch >= b'0' && ch <= b'9' {
+            if (b'0'..=b'9').contains(&ch) {
                 n = 10 * n + u64::from(ch - b'0');
                 self.skip(1);
             } else {
@@ -100,7 +100,7 @@ impl AdvancedParser {
                 None => break n,
             };
 
-            if ch >= b'0' && ch <= b'9' {
+            if (b'0'..=b'9').contains(&ch) {
                 n = 10 * n + u64::from(ch - b'0');
                 self.skip(1);
             } else {

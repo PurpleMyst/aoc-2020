@@ -1,4 +1,5 @@
 use im::Vector as ImVec;
+use static_assert_macro::static_assert;
 
 use super::IMAGE_SIDE;
 use crate::tile::{Tile, TILE_SIDE};
@@ -78,7 +79,7 @@ pub(crate) fn possible_transformations(interior: InteriorImage) -> [InteriorImag
 }
 
 pub(crate) fn load_interiors(shape: &ImVec<Tile>) -> InteriorImage {
-    debug_assert!((TILE_SIDE - 2) * IMAGE_SIDE <= 128);
+    static_assert!((TILE_SIDE - 2) * IMAGE_SIDE <= 128);
 
     let mut result = [0u128; IMAGE_SIDE * (TILE_SIDE - 2)];
     let mut shape = shape.into_iter();

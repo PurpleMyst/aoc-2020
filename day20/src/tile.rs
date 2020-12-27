@@ -1,10 +1,12 @@
 use std::fmt::Display;
 
+use static_assert_macro::static_assert;
+
 const ON: u8 = b'#';
 pub(crate) const TILE_SIDE: usize = 10;
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct Tile {
+pub struct Tile {
     pub(crate) id: u16,
     pub(crate) edges: [u16; 4],
     pub(crate) interior: [u8; TILE_SIDE - 2],
@@ -19,7 +21,7 @@ impl PartialEq for Tile {
 impl Eq for Tile {}
 
 impl Tile {
-    pub(crate) fn from_input(input: &str) -> Self {
+    pub fn from_input(input: &str) -> Self {
         let mut lines = input.lines();
         let id = lines.next().unwrap();
         let id = id["Tile ".len()..id.len() - ":".len()].parse().unwrap();
@@ -34,7 +36,7 @@ impl Tile {
 
         let mut interior = [0u8; TILE_SIDE - 2];
         let mut it = interior.iter_mut();
-        debug_assert!(TILE_SIDE - 2 <= 8);
+        static_assert!(TILE_SIDE - 2 <= 8);
 
         loop {
             left = (left << 1) | (line[0] == ON) as u16;

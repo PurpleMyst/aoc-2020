@@ -8,7 +8,7 @@ pub(crate) const BOTTOM: usize = 3;
 
 const IMAGE_SIDE: usize = 12;
 
-mod tile;
+pub mod tile;
 use tile::Tile;
 
 mod side_filler;

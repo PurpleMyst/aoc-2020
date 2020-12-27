@@ -1,3 +1,5 @@
+#![allow(clippy::inconsistent_digit_grouping)]
+
 use rustc_hash::FxHashMap as HashMap;
 
 const BASE: u64 = 7;
@@ -16,9 +18,9 @@ fn powmod(x: u64, mut y: u64) -> u64 {
         }
 
         tmp = (tmp * tmp) % MODULUS;
-        y = y >> 1;
+        y >>= 1;
     }
-    return t;
+    t
 }
 
 fn babystep_giantstep(pubkey: u64) -> Option<u64> {
